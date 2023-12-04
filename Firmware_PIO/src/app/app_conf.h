@@ -18,7 +18,7 @@
 #endif
 
 // 纪念日APP
-#define APP_ANNIVERSARY_USE 0
+#define APP_ANNIVERSARY_USE 1
 #if APP_ANNIVERSARY_USE
 #include "app/anniversary/anniversary.h"
 #endif
@@ -66,7 +66,7 @@
 #endif
 
 // PC监控APP
-#define APP_PC_RESOURCE_USE 0
+#define APP_PC_RESOURCE_USE 1
 #if APP_PC_RESOURCE_USE
 #include "app/pc_resource/pc_resource.h"
 #endif
@@ -91,7 +91,7 @@
 #endif
 
 // 股票行情查看APP
-#define APP_STOCK_MARKET_USE 0
+#define APP_STOCK_MARKET_USE 1
 #if APP_STOCK_MARKET_USE
 #include "app/stockmarket/stockmarket.h"
 #endif

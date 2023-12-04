@@ -2,7 +2,7 @@
 
 ![(logo)](./logo.png)
 ===
-![Pages](https://img.shields.io/badge/Version-1.0.0-brightgreen.svg?style=flat-square)
+![Pages](https://img.shields.io/badge/Version-1.0.1-brightgreen.svg?style=flat-square)
 ===
 
 > 基于`稚晖君`大佬的开源项目[HoloCubic](https://github.com/peng-zhihui/HoloCubic)的全息桌面站。<br>
@@ -14,9 +14,9 @@
 ## 功能:
 - [x] 时钟气象站：[PuYuuu](https://github.com/PuYuuu)<br>
 `'tianqi_appid''tianqi_appsecret'`[申请地址](https://www.yiketianqi.com/user/login)
-<!-- - [x] 纪念日、心跳：[WoodwindHu](https://github.com/WoodwindHu) -->
-<!-- - [x] PC资源监控：[Jumping99](https://github.com/Jumping99) -->
-<!-- - [x] 股票看板：[redwolf](https://github.com/redwolf) -->
+- [x] 纪念日：[WoodwindHu](https://github.com/WoodwindHu)
+- [x] PC资源监控：[Jumping99](https://github.com/Jumping99)
+- [x] 股票看板：[redwolf](https://github.com/redwolf)
 - [x] B站粉丝：[cnzxo](https://github.com/cnzxo)
 - [x] 2048：[AndyXFuture](https://github.com/AndyXFuture)
 - [ ] 贪吃蛇：[niyongsheng](https://github.com/niyongsheng)

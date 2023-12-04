@@ -17,15 +17,17 @@ void AppController::read_config(SysUtilConfig *cfg)
     if (size == 0)
     {
         // 默认值
-        cfg->ssid_0 = "Xiaomi_805";
-        cfg->password_0 = "805805805";
+        cfg->ssid_0 = "";
+        cfg->password_0 = "";
+        // cfg->ssid_0 = "Xiaomi_805";
+        // cfg->password_0 = "805805805";
         cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
         cfg->backLight = 80;           // 屏幕亮度（1-100）
         cfg->rotation = 4;             // 屏幕旋转方向
         cfg->auto_calibration_mpu = 1; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
         cfg->mpu_order = 0;            // 操作方向
-        cfg->auto_start_app = "Weather";  // 无指定开机自启APP
-        // cfg->auto_start_app = "None";  // 无指定开机自启APP
+        // cfg->auto_start_app = "Weather";  // 指定开机自启APP
+        cfg->auto_start_app = "None";  // 无指定开机自启APP
         this->write_config(cfg);
     }
     else
