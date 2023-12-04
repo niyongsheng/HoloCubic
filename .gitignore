@@ -1,0 +1,9 @@
+# Compiled class file
+.DS_Store
+*.class
+
+# Log file
+logs/
+*.log
+
+build/
