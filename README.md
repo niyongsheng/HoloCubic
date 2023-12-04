@@ -2,7 +2,7 @@
 
 ![(logo)](./logo.png)
 ===
-![Pages](https://img.shields.io/badge/Version-1.0.1-brightgreen.svg?style=flat-square)
+![Pages](https://img.shields.io/badge/Version-1.0.2-brightgreen.svg?style=flat-square)
 ===
 
 > 基于`稚晖君`大佬的开源项目[HoloCubic](https://github.com/peng-zhihui/HoloCubic)的全息桌面站。<br>
@@ -30,15 +30,26 @@
 ## 开发编译:
 VScode上的`PlatformIO`插件中的ESP32-Pico平台开发。
 * `platformio.ini`文件中`upload_port`字段修改成刷写固件的设备COM口
-<img src="./Images/vscode_pico.jpg" style="width: 500px;">
+<img src="./Images/vscode_pico.png" style="width: 500px;">
 
 ## 固件写入:
-1. `bootloader_qio_80m.bin`启动引导`bootloader`
-2. `partitions.bin`分区文件
-3. `boot_app0.bin`
-4. 最新版[固件](https://github.com/niyongsheng/HoloCubic/releases/)`firmware_bin_XXX.bin`
+- 固件下载[工具](https://github.com/espressif/esptool/releases)
+- 最新版[固件](https://github.com/niyongsheng/HoloCubic/releases/)
+```shell
+// 清空flash命令
+python tool-esptoolpy\esptool.py erase_flash
 
-<img src="./Images/holocubic_tool.png" style="width: 500px;">
+// 写入命令
+python tool-esptoolpy\esptool.py \
+--port COM3 \
+--baud 921600 write_flash \
+-fm dio \
+-fs 8MB \
+0x1000 bootloader_dio_80m.bin \
+0x00008000 partitions.bin \
+0x0000e000 boot_app0.bin \
+0x00010000 firmware_XXX.bin
+```
 
 ## 联系方式
 * E-mail: niyongsheng@Outlook.com

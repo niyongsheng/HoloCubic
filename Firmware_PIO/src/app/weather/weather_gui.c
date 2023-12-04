@@ -84,13 +84,13 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
     titleLabel = lv_label_create(scr_2);
     lv_obj_add_style(titleLabel, &chFont_style, LV_STATE_DEFAULT);
     lv_label_set_recolor(titleLabel, true);
-    lv_label_set_text(titleLabel, "查看更多天气");
+    lv_label_set_text(titleLabel, "未来一周昼夜温度");
 
     chart = lv_chart_create(scr_2);
     lv_obj_set_size(chart, 220, 180);
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, -50, 50); // 设置进度条表示的温度为-50~50
     lv_chart_set_point_count(chart, 7);
-    lv_chart_set_div_line_count(chart, 5, 7);
+    lv_chart_set_div_line_count(chart, 5, 7);  
     lv_chart_set_type(chart, LV_CHART_TYPE_LINE); /*Show lines and points too*/
 
     ser1 = lv_chart_add_series(chart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);

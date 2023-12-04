@@ -57,8 +57,8 @@ static void read_config(AN_Config *cfg)
         cfg->anniversary_cnt = 2;
         cfg->event_name[0] = "生日还有";
         cfg->target_date[0].tm_year = 0; // 设置为零则每年重复
-        cfg->target_date[0].tm_mon = 6;
-        cfg->target_date[0].tm_mday = 1;
+        cfg->target_date[0].tm_mon = 7;
+        cfg->target_date[0].tm_mday = 21;
         cfg->event_name[1] = "结婚纪念日还有";
         cfg->target_date[1].tm_year = 0;
         cfg->target_date[1].tm_mon = 9;

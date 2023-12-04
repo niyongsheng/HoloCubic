@@ -11,7 +11,8 @@
 #define WEATHER_APP_NAME "Weather"
 #define WEATHER_NOW_API "https://www.yiketianqi.com/free/day?appid=%s&appsecret=%s&unescape=1&city=%s"
 #define WEATHER_NOW_API_UPDATE "https://yiketianqi.com/api?unescape=1&version=v6&appid=%s&appsecret=%s&city=%s"
-#define WEATHER_DALIY_API "https://www.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"
+#define WEATHER_NOW_API_NEWEST "https://v1.yiketianqi.com/api?unescape=1&version=v91&appid=%s&appsecret=%s&city=%s"
+#define WEATHER_DALIY_API "https://v1.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
 #define WEATHER_PAGE_SIZE 2
 #define UPDATE_WEATHER 0x01       // 更新天气
@@ -59,8 +60,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        cfg->tianqi_appid = "";
-        cfg->tianqi_appsecret = "";
+        cfg->tianqi_appid = "43656176";
+        cfg->tianqi_appsecret = "I42og6Lm";
         write_config(cfg);
     }
     else
@@ -133,7 +134,7 @@ static void get_weather(void)
     //          cfg_data.tianqi_appid,
     //          cfg_data.tianqi_appsecret,
     //          cfg_data.tianqi_addr);
-    snprintf(api, 128, WEATHER_NOW_API_UPDATE,
+    snprintf(api, 128, WEATHER_NOW_API_NEWEST,
              cfg_data.tianqi_appid.c_str(),
              cfg_data.tianqi_appsecret.c_str(),
              cfg_data.tianqi_addr.c_str());
@@ -149,25 +150,44 @@ static void get_weather(void)
         {
             String payload = http.getString();
             Serial.println(payload);
-            DynamicJsonDocument doc(1024);
+            DynamicJsonDocument doc(2560); // 注意数据量大小
             deserializeJson(doc, payload);
             JsonObject sk = doc.as<JsonObject>();
             strcpy(run_data->wea.cityname, sk["city"].as<String>().c_str());
-            run_data->wea.weather_code = weatherMap[sk["wea_img"].as<String>()];
-            run_data->wea.temperature = sk["tem"].as<int>();
+
+            JsonObject data = doc["data"][0].as<JsonObject>();
+            run_data->wea.weather_code = weatherMap[data["wea_img"].as<String>()];
+            run_data->wea.temperature = data["tem"].as<int>();
 
             // 获取湿度
             run_data->wea.humidity = 50;
             char humidity[8] = {0};
-            strncpy(humidity, sk["humidity"].as<String>().c_str(), 8);
+            strncpy(humidity, data["humidity"].as<String>().c_str(), 8);
             humidity[strlen(humidity) - 1] = 0; // 去除尾部的 % 号
             run_data->wea.humidity = atoi(humidity);
 
-            run_data->wea.maxTemp = sk["tem1"].as<int>();
-            run_data->wea.minTemp = sk["tem2"].as<int>();
-            strcpy(run_data->wea.windDir, sk["win"].as<String>().c_str());
-            run_data->wea.windLevel = windLevelAnalyse(sk["win_speed"].as<String>());
-            run_data->wea.airQulity = airQulityLevel(sk["air"].as<int>());
+            // 获取最高\最低温度
+            run_data->wea.maxTemp = data["tem1"].as<int>();
+            run_data->wea.minTemp = data["tem2"].as<int>();
+
+            // 获取风向
+            // 获取当前时间小时数
+            int hour = run_data->g_rtc.getHour(true);
+            char currentHour[5];
+            sprintf(currentHour, "%02d时", hour);
+            JsonArray hours = data["hours"].as<JsonArray>();
+            for (JsonVariant v : hours)
+            {
+                JsonObject hourData = v.as<JsonObject>();
+                if (hourData["hours"].as<String>().equals(currentHour))
+                {
+                    strcpy(run_data->wea.windDir, hourData["win"].as<String>().c_str());
+                    break;
+                }
+            }
+            // strcpy(run_data->wea.windDir, data["win"].as<String>().c_str());
+            run_data->wea.windLevel = windLevelAnalyse(data["win_speed"].as<String>());
+            run_data->wea.airQulity = airQulityLevel(data["air"].as<int>());
         }
     }
     else

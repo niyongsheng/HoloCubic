@@ -17,10 +17,10 @@ void AppController::read_config(SysUtilConfig *cfg)
     if (size == 0)
     {
         // 默认值
-        cfg->ssid_0 = "";
-        cfg->password_0 = "";
-        // cfg->ssid_0 = "Xiaomi_805";
-        // cfg->password_0 = "805805805";
+        // cfg->ssid_0 = "";
+        // cfg->password_0 = "";
+        cfg->ssid_0 = "Xiaomi_805";
+        cfg->password_0 = "805805805";
         cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
         cfg->backLight = 80;           // 屏幕亮度（1-100）
         cfg->rotation = 4;             // 屏幕旋转方向
