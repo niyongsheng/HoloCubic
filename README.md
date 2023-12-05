@@ -14,8 +14,10 @@
 ## 功能:
 - [x] 时钟气象站：[PuYuuu](https://github.com/PuYuuu)<br>
 `'tianqi_appid''tianqi_appsecret'`[申请地址](https://www.yiketianqi.com/user/login)
+- [x] PC资源监控：[Jumping99](https://github.com/Jumping99)<br>
+安装[AIDA64](https://www.aida64.com/downloads)设置[导入](https://www.bilibili.com/video/av200592305)配置文件[aida64_setting.rslcd](https://github.com/niyongsheng/HoloCubic/blob/main/Firmware_PIO/src/app/pc_resource/aida64_setting.rslcd)
+- [x] 屏幕分享：[投屏软件240*240|50%](https://gitee.com/superddg123/esp32-TFT)
 - [x] 纪念日：[WoodwindHu](https://github.com/WoodwindHu)
-- [x] PC资源监控：[Jumping99](https://github.com/Jumping99)
 - [x] 股票看板：[redwolf](https://github.com/redwolf)
 - [x] B站粉丝：[cnzxo](https://github.com/cnzxo)
 - [x] 2048：[AndyXFuture](https://github.com/AndyXFuture)

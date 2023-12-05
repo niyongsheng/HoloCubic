@@ -162,6 +162,9 @@ void setup()
 #if APP_GAME_2048_USE
     app_controller->app_install(&game_2048_app);
 #endif
+#if APP_GAME_SNAKE_USE
+    app_controller->app_install(&game_snake_app);
+#endif
 #if APP_ANNIVERSARY_USE
     app_controller->app_install(&anniversary_app);
 #endif
@@ -173,6 +176,9 @@ void setup()
 #endif
 #if APP_PC_RESOURCE_USE
     app_controller->app_install(&pc_resource_app);
+#endif
+#if APP_EXAMPLE_USE
+    app_controller->app_install(&example_app);
 #endif
     // 自启动APP
     app_controller->app_auto_start();

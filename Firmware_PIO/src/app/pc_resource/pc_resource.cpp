@@ -87,7 +87,7 @@ static void read_config(PCS_Config *cfg)
     if (size == 0)
     {
         // 默认值
-        cfg->pc_ipaddr = "0.0.0.0";
+        cfg->pc_ipaddr = "192.168.88.224";
         cfg->sensorUpdataInterval = 1000; // 传感器数据更新的时间间隔1000(1s)
         write_config(cfg);
     }

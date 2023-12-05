@@ -84,7 +84,7 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
     titleLabel = lv_label_create(scr_2);
     lv_obj_add_style(titleLabel, &chFont_style, LV_STATE_DEFAULT);
     lv_label_set_recolor(titleLabel, true);
-    lv_label_set_text(titleLabel, "未来一周昼夜温度");
+    lv_label_set_text(titleLabel, "一周温度查看");
 
     chart = lv_chart_create(scr_2);
     lv_obj_set_size(chart, 220, 180);
