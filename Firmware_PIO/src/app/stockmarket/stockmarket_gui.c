@@ -126,7 +126,7 @@ void display_stockmarket_init(void)
     lv_obj_align(NameLabel, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_obj_align(uplineLabel, LV_ALIGN_LEFT_MID, 0, -90);
     lv_obj_align_to(nowQuoLabel, uplineLabel, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
-    lv_obj_align_to(ArrowImg, nowQuoLabel, LV_ALIGN_OUT_RIGHT_MID, 100, 0);
+    lv_obj_align_to(ArrowImg, nowQuoLabel, LV_ALIGN_OUT_RIGHT_MID, 125, 0);
     lv_obj_align_to(ChgValueLabel, ArrowImg, LV_ALIGN_OUT_RIGHT_BOTTOM, 30, 10);
     lv_obj_align_to(ChgPercentLabel, ArrowImg, LV_ALIGN_OUT_RIGHT_TOP, 30, 20);
     lv_obj_align_to(lineLabel2, uplineLabel, LV_ALIGN_BOTTOM_MID, 0, 60);

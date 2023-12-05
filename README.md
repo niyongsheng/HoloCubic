@@ -9,7 +9,7 @@
 左右倾斜切换APP，向前倾斜进入当前应用，后仰即退出该APP。
 
 ## 实物
-<img src="./Images/product.jpg" style="height: 220px; border-radius:15px">
+<img src="./Images/product.jpg" style="height: 220px; width: 220px; border-radius:15px">
 
 ## 功能:
 - [x] 时钟气象站：[PuYuuu](https://github.com/PuYuuu)<br>
@@ -36,13 +36,13 @@ VScode上的`PlatformIO`插件中的ESP32-Pico平台开发。
 
 ## 固件写入:
 - 固件下载[工具](https://github.com/espressif/esptool/releases)
-- 最新版[固件](https://github.com/niyongsheng/HoloCubic/releases/)
+- 最新版[固件](https://github.com/niyongsheng/HoloCubic/releases)
 ```shell
 // 清空flash命令
-python tool-esptoolpy\esptool.py erase_flash
+python esptool.py erase_flash
 
 // 写入命令
-python tool-esptoolpy\esptool.py \
+python esptool.py \
 --port COM3 \
 --baud 921600 write_flash \
 -fm dio \
