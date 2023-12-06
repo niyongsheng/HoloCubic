@@ -1,71 +1,84 @@
 #include "game_snake.h"
 #include "game_snake_gui.h"
 #include "sys/app_controller.h"
-#include "common.h"
 #include "freertos/semphr.h"
+#include "common.h"
 
+// 游戏名称
 #define GAME_APP_NAME "Snake"
 
-// 动态数据，APP的生命周期结束也需要释放它
-struct ExampleAppRunData
+// 每700ms移动一次
+#define SNAKE_SPEED 700
+
+struct SnakeAppRunData
 {
-    unsigned int val1;
-    unsigned int val2;
-    unsigned int val3;
+    unsigned int score;
+    BaseType_t xReturned_task_run = pdFALSE;
+    TaskHandle_t xHandle_task_run = NULL;
 };
 
-// 常驻数据，可以不随APP的生命周期而释放或删除
-struct ExampleAppForeverData
+static SnakeAppRunData *run_data = NULL;
+
+void taskRun(void *parameter)
 {
-    unsigned int val1;
-    unsigned int val2;
-    unsigned int val3;
-};
-
-// 保存APP运行时的参数信息，理论上关闭APP时推荐在 xxx_exit_callback 中释放掉
-static ExampleAppRunData *run_data = NULL;
-
-// 当然你也可以添加恒定在内存中的少量变量（退出时不用释放，实现第二次启动时可以读取）
-// 考虑到所有的APP公用内存，尽量减少 forever_data 的数据占用
-static ExampleAppForeverData forever_data;
+    while (1)
+    {
+        // LVGL任务主函数，处理所有的LVGL任务，包括绘制界面，处理用户输入等。
+        AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
+        vTaskDelay(5 / portTICK_PERIOD_MS);
+    }
+}
 
 static int game_snake_init(AppController *sys)
 {
     // 初始化运行时的参数
     game_snake_gui_init();
     // 初始化运行时参数
-    run_data = (ExampleAppRunData *)calloc(1, sizeof(ExampleAppRunData));
-    run_data->val1 = 0;
-    run_data->val2 = 0;
-    run_data->val3 = 0;
-    // 使用 forever_data 中的变量，任何函数都可以用
-    Serial.print(forever_data.val1);
-
-    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
-    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile("/example.cfg", (uint8_t *)info);
-    // 解析数据
-    // 将配置数据保存在文件中（持久化）
-    g_flashCfg.writeFile("/example.cfg", "value1=100\nvalue2=200");
+    run_data = (SnakeAppRunData *)calloc(1, sizeof(SnakeAppRunData));
+    run_data->score = 0;
+    // 随机生成食物
+    // generate_food();
+    run_data->xReturned_task_run = xTaskCreate(
+        taskRun,                      /*任务函数*/
+        "taskRun",                    /*带任务名称的字符串*/
+        8 * 1024,                     /*堆栈大小，单位为字节*/
+        NULL,                         /*作为任务输入传递的参数*/
+        1,                            /*任务的优先级*/
+        &run_data->xHandle_task_run); /*任务句柄*/
     
     return 0;
 }
 
-static void game_snake_process(AppController *sys,
-                            const ImuAction *act_info)
+static void game_snake_process(AppController *sys, const ImuAction *act_info)
 {
     if (RETURN == act_info->active)
     {
         sys->app_exit(); // 退出APP
         return;
     }
-    // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 game_snake_message_handle 函数
-    // sys->send_to(EXAMPLE_APP_NAME, CTRL_NAME,
-    //              APP_MESSAGE_WIFI_CONN, (void *)run_data->val1, NULL);
 
-    // 程序需要时可以适当加延时
-    // delay(300);
+    // 操作触发
+    if (TURN_RIGHT == act_info->active)
+    {
+        update_driection(DIR_RIGHT);
+    }
+    else if (TURN_LEFT == act_info->active)
+    {
+        update_driection(DIR_LEFT);
+    }
+    else if (UP == act_info->active)
+    {
+         update_driection(DIR_UP);
+    }
+    else if (DOWN == act_info->active)
+    {
+         update_driection(DIR_DOWN);
+    }
+
+    display_snake(LV_SCR_LOAD_ANIM_NONE);
+
+    // 速度控制
+    delay(SNAKE_SPEED);
 }
 
 static void game_snake_background_task(AppController *sys,
@@ -87,7 +100,14 @@ static void game_snake_background_task(AppController *sys,
 
 static int game_snake_exit_callback(void *param)
 {
-    // 释放资源
+    if (run_data->xReturned_task_run == pdPASS)
+    {
+        vTaskDelete(run_data->xHandle_task_run);
+    }
+
+    xSemaphoreGive(lvgl_mutex);
+
+    // 释放事件资源
     if (NULL != run_data)
     {
         free(run_data);
@@ -120,17 +140,16 @@ static void game_snake_message_handle(const char *from, const char *to,
     break;
     case APP_MESSAGE_GET_PARAM:
     {
-        char *param_key = (char *)message;
+
     }
     break;
     case APP_MESSAGE_SET_PARAM:
     {
-        char *param_key = (char *)message;
-        char *param_val = (char *)ext_info;
+
     }
     break;
     default:
-        break;
+        break;            
     }
 }
 
