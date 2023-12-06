@@ -7,8 +7,8 @@
 // 游戏名称
 #define GAME_APP_NAME "Snake"
 
-// 每700ms移动一次
-#define SNAKE_SPEED 700
+// 每1000ms移动一次
+#define SNAKE_SPEED 1000
 
 struct SnakeAppRunData
 {
