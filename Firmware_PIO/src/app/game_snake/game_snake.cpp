@@ -1,18 +1,18 @@
 #include "game_snake.h"
 #include "game_snake_gui.h"
 #include "sys/app_controller.h"
-#include "freertos/semphr.h"
 #include "common.h"
+#include "freertos/semphr.h"
 
 // 游戏名称
 #define GAME_APP_NAME "Snake"
 
-// 每1000ms移动一次
 #define SNAKE_SPEED 1000
 
 struct SnakeAppRunData
 {
     unsigned int score;
+    int gameStatus;
     BaseType_t xReturned_task_run = pdFALSE;
     TaskHandle_t xHandle_task_run = NULL;
 };
@@ -27,17 +27,18 @@ void taskRun(void *parameter)
         AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
+    vTaskDelete(NULL);
 }
 
 static int game_snake_init(AppController *sys)
 {
     // 初始化运行时的参数
     game_snake_gui_init();
+
     // 初始化运行时参数
     run_data = (SnakeAppRunData *)calloc(1, sizeof(SnakeAppRunData));
     run_data->score = 0;
-    // 随机生成食物
-    // generate_food();
+    run_data->gameStatus = 0;
     run_data->xReturned_task_run = xTaskCreate(
         taskRun,                      /*任务函数*/
         "taskRun",                    /*带任务名称的字符串*/
@@ -45,7 +46,7 @@ static int game_snake_init(AppController *sys)
         NULL,                         /*作为任务输入传递的参数*/
         1,                            /*任务的优先级*/
         &run_data->xHandle_task_run); /*任务句柄*/
-    
+
     return 0;
 }
 
@@ -68,21 +69,24 @@ static void game_snake_process(AppController *sys, const ImuAction *act_info)
     }
     else if (UP == act_info->active)
     {
-         update_driection(DIR_UP);
+        update_driection(DIR_UP);
     }
     else if (DOWN == act_info->active)
     {
-         update_driection(DIR_DOWN);
+        update_driection(DIR_DOWN);
     }
 
-    display_snake(LV_SCR_LOAD_ANIM_NONE);
+    if (run_data->gameStatus == 0 && run_data->xReturned_task_run == pdPASS)
+    {
+        AIO_LVGL_OPERATE_LOCK(display_snake(run_data->gameStatus, LV_SCR_LOAD_ANIM_NONE););
+    }
 
     // 速度控制
     delay(SNAKE_SPEED);
 }
 
 static void game_snake_background_task(AppController *sys,
-                                    const ImuAction *act_info)
+                                       const ImuAction *act_info)
 {
     // 本函数为后台任务，主控制器会间隔一分钟调用此函数
     // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
@@ -100,10 +104,14 @@ static void game_snake_background_task(AppController *sys,
 
 static int game_snake_exit_callback(void *param)
 {
+    // 查杀任务
     if (run_data->xReturned_task_run == pdPASS)
     {
         vTaskDelete(run_data->xHandle_task_run);
     }
+
+    // 释放页面资源
+    game_snake_gui_del();
 
     xSemaphoreGive(lvgl_mutex);
 
@@ -117,8 +125,8 @@ static int game_snake_exit_callback(void *param)
 }
 
 static void game_snake_message_handle(const char *from, const char *to,
-                                   APP_MESSAGE_TYPE type, void *message,
-                                   void *ext_info)
+                                      APP_MESSAGE_TYPE type, void *message,
+                                      void *ext_info)
 {
     // 目前主要是wifi开关类事件（用于功耗控制）
     switch (type)
@@ -140,19 +148,17 @@ static void game_snake_message_handle(const char *from, const char *to,
     break;
     case APP_MESSAGE_GET_PARAM:
     {
-
     }
     break;
     case APP_MESSAGE_SET_PARAM:
     {
-
     }
     break;
     default:
-        break;            
+        break;
     }
 }
 
 APP_OBJ game_snake_app = {GAME_APP_NAME, &app_game_snake, "",
-                         game_snake_init, game_snake_process, game_snake_background_task,
-                       game_snake_exit_callback, game_snake_message_handle};
+                          game_snake_init, game_snake_process, game_snake_background_task,
+                          game_snake_exit_callback, game_snake_message_handle};

@@ -23,7 +23,7 @@ typedef enum {
     void game_snake_gui_init(void);
     void generate_food();
     void update_driection(Direction dir);
-    void display_snake(lv_scr_load_anim_t anim_type);
+    void display_snake(int gameStatus, lv_scr_load_anim_t anim_type);
     void game_snake_gui_del(void);
 
 #ifdef __cplusplus

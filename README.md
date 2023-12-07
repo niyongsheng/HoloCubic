@@ -2,7 +2,7 @@
 
 ![(logo)](./logo.png)
 ===
-![Pages](https://img.shields.io/badge/Version-1.0.2-brightgreen.svg?style=flat-square)
+![Pages](https://img.shields.io/badge/Version-1.0.3-brightgreen.svg?style=flat-square)
 ===
 
 > 基于`稚晖君`大佬的开源项目[HoloCubic](https://github.com/peng-zhihui/HoloCubic)的全息桌面站。<br>
@@ -21,7 +21,7 @@
 - [x] 股票看板：[redwolf](https://github.com/redwolf)
 - [x] B站粉丝：[cnzxo](https://github.com/cnzxo)
 - [x] 2048：[AndyXFuture](https://github.com/AndyXFuture)
-- [ ] 贪吃蛇：[niyongsheng](https://github.com/niyongsheng)
+- [X] 贪吃蛇：[niyongsheng](https://github.com/niyongsheng)
 
 * `./SD_Card`中文件拷贝到Fat32格式的存储卡中（TF卡为非必要硬件）
 
