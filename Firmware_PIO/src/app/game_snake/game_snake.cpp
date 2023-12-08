@@ -54,6 +54,7 @@ static void game_snake_process(AppController *sys, const ImuAction *act_info)
 {
     if (RETURN == act_info->active)
     {
+        run_data->gameStatus = -1;
         sys->app_exit(); // 退出APP
         return;
     }
@@ -113,6 +114,7 @@ static int game_snake_exit_callback(void *param)
     // 释放页面资源
     game_snake_gui_del();
 
+    // 释放lvgl_mutex信号量
     xSemaphoreGive(lvgl_mutex);
 
     // 释放事件资源

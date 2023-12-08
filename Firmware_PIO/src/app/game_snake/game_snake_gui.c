@@ -241,6 +241,30 @@ void generate_food()
 
 void update_driection(Direction dir)
 {
+    // 长度大于1时，不允许反向移动
+    if (snakeLength > 1)
+    {
+        switch (direction)
+        {
+        case DIR_UP:
+            if (dir == DIR_DOWN)
+                return;
+            break;
+        case DIR_DOWN:
+            if (dir == DIR_UP)
+                return;
+            break;
+        case DIR_LEFT:
+            if (dir == DIR_RIGHT)
+                return;
+            break;
+        case DIR_RIGHT:
+            if (dir == DIR_LEFT)
+                return;
+            break;
+        }
+    }
+    
     // 更新移动方向
     direction = dir;
 }
