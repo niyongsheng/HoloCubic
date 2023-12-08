@@ -60,8 +60,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        cfg->tianqi_appid = "26634761";
-        cfg->tianqi_appsecret = "WCcHL2zK";
+        cfg->tianqi_appid = "43656176";
+        cfg->tianqi_appsecret = "I42og6Lm";
         write_config(cfg);
     }
     else
