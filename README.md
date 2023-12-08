@@ -9,9 +9,9 @@
 左右倾斜切换APP，向前倾斜进入当前应用，后仰即退出该APP。
 
 ## 实物
-贪吃蛇 | 时钟气象站 | B站粉丝 | 股票看板 
+贪吃蛇 | 股票看板 | 时钟气象站 | B站粉丝
 --- | --- | --- | --- | 
-<img src="./Images/IMG_0609.jpg" width="240"> | <img src="./Images/IMG_0623.jpg" width="240"> | <img src="./Images/IMG_0645.jpg" width="240"> | <img src="./Images/IMG_0614.jpg" width="240"> 
+<img src="./Images/IMG_0609.jpg" width="240"> | <img src="./Images/IMG_0614.jpg" width="240"> | <img src="./Images/IMG_0623.jpg" width="240"> | <img src="./Images/IMG_0645.jpg" width="240"> 
 
 
 ## 功能:
