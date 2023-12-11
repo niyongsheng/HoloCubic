@@ -28,8 +28,8 @@ struct WT_Config
     String tianqi_addr;                  // tianqiapid 的地址（填中文）
     unsigned long weatherUpdataInterval; // 天气更新的时间间隔(s)
     unsigned long timeUpdataInterval;    // 日期时钟更新的时间间隔(s)
-    String dingding_userid; 
     String dingding_accesstoken; 
+    String dingding_userid; 
 };
 
 static void write_config(WT_Config *cfg)
@@ -46,8 +46,8 @@ static void write_config(WT_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%lu\n", cfg->timeUpdataInterval);
     w_data += tmp;
-    w_data = w_data + cfg->dingding_userid + "\n";
     w_data = w_data + cfg->dingding_accesstoken + "\n";
+    w_data = w_data + cfg->dingding_userid + "\n";
     g_flashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
 }
 
@@ -66,8 +66,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        cfg->dingding_userid = "";
-        cfg->dingding_accesstoken = "";
+        cfg->dingding_userid = "9e3da2ed5d883663bb5c4fb1dbdf41f2";
+        cfg->dingding_accesstoken = "1122725802";
         write_config(cfg);
     }
     else
@@ -80,8 +80,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = param[2];
         cfg->weatherUpdataInterval = atol(param[3]);
         cfg->timeUpdataInterval = atol(param[4]);
-        cfg->dingding_userid = param[5];
-        cfg->dingding_accesstoken = param[6];
+        cfg->dingding_accesstoken = param[5];
+        cfg->dingding_userid = param[6];
     }
 }
 
