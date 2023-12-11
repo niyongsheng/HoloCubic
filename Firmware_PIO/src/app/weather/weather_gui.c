@@ -26,6 +26,7 @@ static lv_obj_t *dateLabel = NULL;
 static lv_obj_t *tempImg = NULL, *tempBar = NULL, *tempLabel = NULL;
 static lv_obj_t *humiImg = NULL, *humiBar = NULL, *humiLabel = NULL;
 static lv_obj_t *spaceImg = NULL;
+static lv_obj_t *msgBg = NULL, *msgLabel = NULL;
 
 static lv_chart_series_t *ser1, *ser2;
 
@@ -214,6 +215,19 @@ void display_weather_init(lv_scr_load_anim_t anim_type)
     spaceImg = lv_img_create(scr_1);
     lv_img_set_src(spaceImg, manImage_map[0]);
 
+    // 消息背景
+    msgBg = lv_btn_create(scr_1);
+    lv_obj_set_style_radius(msgBg, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(msgBg, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+    lv_obj_set_size(msgBg, 30, 30);
+    lv_obj_align(msgBg, LV_ALIGN_BOTTOM_RIGHT, -5, -60);
+
+    // 消息提示
+    msgLabel = lv_label_create(msgBg);
+    lv_obj_add_style(msgLabel, &chFont_style, LV_STATE_DEFAULT);
+    lv_obj_align(msgLabel, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_text_fmt(msgLabel, "%d", 0);
+
     // 绘制图形
     lv_obj_align(weatherImg, LV_ALIGN_TOP_RIGHT, -10, 10);
     lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, 20, 15);
@@ -263,6 +277,8 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     lv_label_set_text_fmt(tempLabel, "%2d°C", weaInfo.temperature);
     lv_bar_set_value(humiBar, weaInfo.humidity, LV_ANIM_ON);
     lv_label_set_text_fmt(humiLabel, "%d%%", weaInfo.humidity);
+
+    lv_label_set_text_fmt(msgLabel, "%d", weaInfo.msgCount);
 
     // // 绘制图形
     // lv_obj_align(weatherImg, NULL, LV_ALIGN_TOP_RIGHT, -10, 10);

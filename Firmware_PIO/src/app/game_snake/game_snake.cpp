@@ -34,17 +34,18 @@ static int game_snake_init(AppController *sys)
 {
     // 初始化运行时的参数
     game_snake_gui_init();
-
+    // 随机数种子
+    randomSeed(analogRead(A0));
     // 初始化运行时参数
     run_data = (SnakeAppRunData *)calloc(1, sizeof(SnakeAppRunData));
     run_data->score = 0;
     run_data->gameStatus = 0;
     run_data->xReturned_task_run = xTaskCreate(
         taskRun,                      /*任务函数*/
-        "taskRun",                    /*带任务名称的字符串*/
+        "taskRun",                    /*任务名称*/
         8 * 1024,                     /*堆栈大小，单位为字节*/
-        NULL,                         /*作为任务输入传递的参数*/
-        1,                            /*任务的优先级*/
+        NULL,                         /*参数*/
+        1,                            /*优先级*/
         &run_data->xHandle_task_run); /*任务句柄*/
 
     return 0;

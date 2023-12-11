@@ -28,6 +28,8 @@ struct WT_Config
     String tianqi_addr;                  // tianqiapid 的地址（填中文）
     unsigned long weatherUpdataInterval; // 天气更新的时间间隔(s)
     unsigned long timeUpdataInterval;    // 日期时钟更新的时间间隔(s)
+    String dingding_userid; 
+    String dingding_accesstoken; 
 };
 
 static void write_config(WT_Config *cfg)
@@ -44,6 +46,8 @@ static void write_config(WT_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%lu\n", cfg->timeUpdataInterval);
     w_data += tmp;
+    w_data = w_data + cfg->dingding_userid + "\n";
+    w_data = w_data + cfg->dingding_accesstoken + "\n";
     g_flashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
 }
 
@@ -57,11 +61,13 @@ static void read_config(WT_Config *cfg)
     if (size == 0)
     {
         // 默认值
+        cfg->tianqi_appid = "43656176";
+        cfg->tianqi_appsecret = "I42og6Lm";
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        cfg->tianqi_appid = "43656176";
-        cfg->tianqi_appsecret = "I42og6Lm";
+        cfg->dingding_userid = "";
+        cfg->dingding_accesstoken = "";
         write_config(cfg);
     }
     else
@@ -74,6 +80,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = param[2];
         cfg->weatherUpdataInterval = atol(param[3]);
         cfg->timeUpdataInterval = atol(param[4]);
+        cfg->dingding_userid = param[5];
+        cfg->dingding_accesstoken = param[6];
     }
 }
 
@@ -187,6 +195,53 @@ static void get_weather(void)
             // strcpy(run_data->wea.windDir, data["win"].as<String>().c_str());
             run_data->wea.windLevel = windLevelAnalyse(data["win_speed"].as<String>());
             run_data->wea.airQulity = airQulityLevel(data["air"].as<int>());
+        }
+    }
+    else
+    {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+    http.end();
+}
+
+static void get_message(void)
+{
+    // 获取钉钉所有@我的消息
+    if (WL_CONNECTED != WiFi.status())
+        return;
+
+    HTTPClient http;
+    http.setTimeout(1000);
+    char api[128] = {0};
+    snprintf(api, 128, "https://oapi.dingtalk.com/message/list_message?access_token=%s&cursor=0&size=20", cfg_data.dingding_accesstoken.c_str());
+    Serial.print("API = ");
+    Serial.println(api);
+    http.begin(api);
+    
+        int httpCode = http.GET();
+    if (httpCode > 0)
+    {
+        // file found at server
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
+        {
+            String payload = http.getString();
+            Serial.println(payload);
+            DynamicJsonDocument doc(2560); // 注意数据量大小
+            deserializeJson(doc, payload);
+
+            // 获取消息数
+            JsonObject sk = doc.as<JsonObject>();
+            int count = sk["count"].as<int>();
+            Serial.println(count);
+            // 更新msglabel
+            if (count > 0)
+            {
+                run_data->wea.msgCount = count;
+            }
+            else
+            {
+                run_data->wea.msgCount = 0;
+            }
         }
     }
     else
@@ -317,13 +372,13 @@ static int weather_init(AppController *sys)
 
     // 目前更新数据的任务栈大小5000够用，4000不够用
     // 为了后期迭代新功能 当前设置为8000
-    // run_data->xReturned_task_task_update = xTaskCreate(
-    //     task_update,                          /*任务函数*/
-    //     "Task_update",                        /*带任务名称的字符串*/
-    //     8000,                                /*堆栈大小，单位为字节*/
-    //     NULL,                                 /*作为任务输入传递的参数*/
-    //     1,                                    /*任务的优先级*/
-    //     &run_data->xHandle_task_task_update); /*任务句柄*/
+    run_data->xReturned_task_task_update = xTaskCreate(
+        task_update,                          /*任务函数*/
+        "Task_update",                        /*带任务名称的字符串*/
+        8000,                                 /*堆栈大小，单位为字节*/
+        NULL,                                 /*作为任务输入传递的参数*/
+        1,                                    /*任务的优先级*/
+        &run_data->xHandle_task_task_update); /*任务句柄*/
 
     return 0;
 }
@@ -417,41 +472,41 @@ static int weather_exit_callback(void *param)
     return 0;
 }
 
-// static void task_update(void *parameter)
-// {
-//     // 数据更新任务
-//     while (1)
-//     {
-//         if (run_data->update_type & UPDATE_WEATHER)
-//         {
-//             get_weather();
-//             if (run_data->clock_page == 0)
-//             {
-//                 display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
-//             }
-//             run_data->update_type &= (~UPDATE_WEATHER);
-//         }
-//         if (run_data->update_type & UPDATE_TIME)
-//         {
-//             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-//             if (run_data->clock_page == 0)
-//             {
-//                 UpdateTime_RTC(timestamp);
-//             }
-//             run_data->update_type &= (~UPDATE_TIME);
-//         }
-//         if (run_data->update_type & UPDATE_DALIY_WEATHER)
-//         {
-//             get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);
-//             if (run_data->clock_page == 1)
-//             {
-//                 display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE);
-//             }
-//             run_data->update_type &= (~UPDATE_DALIY_WEATHER);
-//         }
-//         vTaskDelay(2000 / portTICK_PERIOD_MS);
-//     }
-// }
+static void task_update(void *parameter)
+{
+    // 数据更新任务
+    while (1)
+    {
+        if (run_data->update_type & UPDATE_WEATHER)
+        {
+            get_weather();
+            if (run_data->clock_page == 0)
+            {
+                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+            }
+            run_data->update_type &= (~UPDATE_WEATHER);
+        }
+        if (run_data->update_type & UPDATE_TIME)
+        {
+            long long timestamp = get_timestamp(TIME_API); // nowapi时间API
+            if (run_data->clock_page == 0)
+            {
+                UpdateTime_RTC(timestamp);
+            }
+            run_data->update_type &= (~UPDATE_TIME);
+        }
+        if (run_data->update_type & UPDATE_DALIY_WEATHER)
+        {
+            get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);
+            if (run_data->clock_page == 1)
+            {
+                display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE);
+            }
+            run_data->update_type &= (~UPDATE_DALIY_WEATHER);
+        }
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+    }
+}
 
 static void weather_message_handle(const char *from, const char *to,
                                    APP_MESSAGE_TYPE type, void *message,

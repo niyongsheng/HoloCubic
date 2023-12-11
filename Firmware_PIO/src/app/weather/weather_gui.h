@@ -15,6 +15,8 @@ struct Weather
 
     short daily_max[7];
     short daily_min[7];
+
+    int msgCount;
 };
 
 struct TimeStr

@@ -6,12 +6,12 @@
 ===
 
 > 基于`稚晖君`大佬的开源项目[HoloCubic](https://github.com/peng-zhihui/HoloCubic)的全息桌面站。<br>
-左右倾斜切换APP，向前倾斜进入当前应用，后仰即退出该APP。
+左右倾斜切换APP，后仰进入当前应用，前倾退出该APP。
 
 ## 实物
-贪吃蛇 | 股票看板 | 时钟气象站 | B站粉丝
---- | --- | --- | --- | 
-<img src="./Images/IMG_0609.jpg" width="240"> | <img src="./Images/IMG_0614.jpg" width="240"> | <img src="./Images/IMG_0623.jpg" width="240"> | <img src="./Images/IMG_0645.jpg" width="240"> 
+| 贪吃蛇 | 股票看板 | 时钟气象站 | B站粉丝 | 
+| :-----: | :-----: | :-----: | :-----: | 
+| <img src="./Images/IMG_0609.jpg" width="240"> | <img src="./Images/IMG_0614.jpg" width="240"> | <img src="./Images/IMG_0623.jpg" width="240"> | <img src="./Images/IMG_0645.jpg" width="240"> | 
 
 
 ## 功能:
@@ -24,7 +24,7 @@
 - [x] 股票看板：[redwolf](https://github.com/redwolf)
 - [x] B站粉丝：[cnzxo](https://github.com/cnzxo)
 - [x] 2048：[AndyXFuture](https://github.com/AndyXFuture)
-- [X] 贪吃蛇：[niyongsheng](https://github.com/niyongsheng)
+- [X] 贪吃蛇：[niyongsheng](https://github.com/niyongsheng/HoloCubic/tree/main/Firmware_PIO/src/app/game_snake)
 
 * `./SD_Card`中文件拷贝到Fat32格式的存储卡中（TF卡为非必要硬件）
 
