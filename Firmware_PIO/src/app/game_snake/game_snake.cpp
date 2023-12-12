@@ -33,18 +33,10 @@ void taskRun(void *parameter)
 
 static int game_snake_init(AppController *sys)
 {
-    // 调整RGB模式  HSV色彩模式
-    // RgbParam rgb_setting = {LED_MODE_RGB,
-    //                         255, 0, 0,
-    //                         255, 255, 255,
-    //                         0, 255, 0,
-    //                         0.15, 0.95, 0.001, 4};
-    // set_rgb_and_run(&rgb_setting);
-
-    // 初始化运行时的参数
-    game_snake_gui_init();
     // 随机数种子
     randomSeed(analogRead(A0));
+    // 初始化运行时的参数
+    game_snake_gui_init();
     // 初始化运行时参数
     run_data = (SnakeAppRunData *)calloc(1, sizeof(SnakeAppRunData));
     run_data->score = 0;

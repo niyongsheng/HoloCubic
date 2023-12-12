@@ -66,15 +66,15 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        cfg->dingding_userid = "9e3da2ed5d883663bb5c4fb1dbdf41f2";
-        cfg->dingding_accesstoken = "1122725802";
+        cfg->dingding_accesstoken = "9e3da2ed7d883663bb5c4fb1dbdf41f1";
+        cfg->dingding_userid = "1122725802";
         write_config(cfg);
     }
     else
     {
         // 解析数据
-        char *param[5] = {0};
-        analyseParam(info, 5, param);
+        char *param[7] = {0};
+        analyseParam(info, 7, param);
         cfg->tianqi_appid = param[0];
         cfg->tianqi_appsecret = param[1];
         cfg->tianqi_addr = param[2];
@@ -584,6 +584,14 @@ static void weather_message_handle(const char *from, const char *to,
         {
             snprintf((char *)ext_info, 32, "%lu", cfg_data.timeUpdataInterval);
         }
+        else if (!strcmp(param_key, "dingding_accesstoken"))
+        {
+            snprintf((char *)ext_info, 32, "%s", cfg_data.dingding_accesstoken.c_str());
+        }
+        else if (!strcmp(param_key, "dingding_userid"))
+        {
+            snprintf((char *)ext_info, 32, "%s", cfg_data.dingding_userid.c_str());
+        }
         else
         {
             snprintf((char *)ext_info, 32, "%s", "NULL");
@@ -613,6 +621,18 @@ static void weather_message_handle(const char *from, const char *to,
         else if (!strcmp(param_key, "timeUpdataInterval"))
         {
             cfg_data.timeUpdataInterval = atol(param_val);
+        }
+        else if (!strcmp(param_key, "dingding_accesstoken"))
+        {
+            cfg_data.dingding_accesstoken = param_val;
+        }
+        else if (!strcmp(param_key, "dingding_userid"))
+        {
+            cfg_data.dingding_userid = param_val;
+        }
+        else
+        {
+            Serial.println(F("param_key error"));
         }
     }
     break;
