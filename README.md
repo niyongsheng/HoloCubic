@@ -40,20 +40,44 @@ VScode上的`PlatformIO`插件中的ESP32-Pico平台开发。
 ## 固件写入:
 - 固件下载[工具](https://github.com/espressif/esptool/releases)
 - 最新版[固件](https://github.com/niyongsheng/HoloCubic/releases)
+- 波特率 `921600` `576000` `460800` `230400` `115200` `57600`
 ```shell
-// 清空flash命令
-python esptool.py erase_flash
+// windows清空flash
+esptool.exe -p COM3 erase_flash
 
-// 写入命令
-python esptool.py \
---port COM3 \
---baud 921600 write_flash \
+// windows固件写入
+esptool.exe \
+-p COM3 \
+-b 921600 write_flash \
 -fm dio \
 -fs 8MB \
-0x1000 bootloader_dio_80m.bin \
+0x1000 bootloader_qio_80m.bin \
 0x00008000 partitions.bin \
 0x0000e000 boot_app0.bin \
-0x00010000 firmware_XXX.bin
+0x00010000 firmware_v1.0.0.bin
+```
+
+```shell
+// mac查询usb设备
+ls /dev/tty.*
+
+// 修改权限
+chmod +x esptool
+
+// 清空flash
+./esptool \
+--port /dev/tty.usbserial-56A50335151 erase_flash
+
+// mac固件写入
+./esptool \
+--port /dev/tty.usbserial-56A50335151 \
+--baud 460800 write_flash \
+-fm dio \
+-fs 8MB \
+0x1000 bootloader_qio_80m.bin \
+0x00008000 partitions.bin \
+0x0000e000 boot_app0.bin \
+0x00010000 firmware_v1.0.0.bin
 ```
 
 ## 联系方式

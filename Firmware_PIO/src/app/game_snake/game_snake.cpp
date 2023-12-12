@@ -27,11 +27,20 @@ void taskRun(void *parameter)
         AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
+    Serial.println("Ending lv_task_handler");
     vTaskDelete(NULL);
 }
 
 static int game_snake_init(AppController *sys)
 {
+    // 调整RGB模式  HSV色彩模式
+    // RgbParam rgb_setting = {LED_MODE_RGB,
+    //                         255, 0, 0,
+    //                         255, 255, 255,
+    //                         0, 255, 0,
+    //                         0.15, 0.95, 0.001, 4};
+    // set_rgb_and_run(&rgb_setting);
+
     // 初始化运行时的参数
     game_snake_gui_init();
     // 随机数种子
@@ -112,11 +121,11 @@ static int game_snake_exit_callback(void *param)
         vTaskDelete(run_data->xHandle_task_run);
     }
 
-    // 释放页面资源
-    game_snake_gui_del();
-
     // 释放lvgl_mutex信号量
     xSemaphoreGive(lvgl_mutex);
+
+    // 释放页面资源
+    game_snake_gui_del();
 
     // 释放事件资源
     if (NULL != run_data)

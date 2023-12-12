@@ -2,7 +2,6 @@
 #include "lvgl.h"
 #include "esp_system.h"
 #include "esp_log.h"
-#include <stdlib.h>
 
 // 定义屏幕尺寸
 #define SCREEN_WIDTH 240
@@ -23,6 +22,7 @@ SnakeSegment snake[SNAKE_SIZE];  // 贪吃蛇的身体
 int snakeLength = 1;             // 贪吃蛇的长度
 bool gameOver = false;           // 游戏是否结束
 Direction direction = DIR_RIGHT; // 贪吃蛇的初始移动方向
+static int executed = 0;
 
 // 食物的位置
 int foodX;
@@ -116,17 +116,20 @@ void display_snake(int gameStatus, lv_scr_load_anim_t anim_type)
 {
     if (gameOver)
     {
-        // 游戏结束label添加动画
-        lv_anim_init(&game_over_label_anim);
-        lv_anim_set_var(&game_over_label_anim, game_over_label);
-        lv_anim_set_exec_cb(&game_over_label_anim, (lv_anim_exec_xcb_t)lv_img_set_offset_x);
-        lv_anim_set_delay(&game_over_label_anim, 500);
-        lv_anim_set_time(&game_over_label_anim, 1000);
-        lv_anim_set_playback_delay(&game_over_label_anim, 500);
-        lv_anim_set_playback_time(&game_over_label_anim, 1000);
-        lv_anim_set_path_cb(&game_over_label_anim, lv_anim_path_linear);
-        lv_anim_set_values(&game_over_label_anim, SCREEN_WIDTH, 0);
-        lv_anim_start(&game_over_label_anim);
+        if (!executed)
+        {
+            executed = 1;
+            // 游戏结束label动画
+            lv_anim_init(&game_over_label_anim);
+            lv_anim_set_var(&game_over_label_anim, game_over_label);
+            lv_anim_set_exec_cb(&game_over_label_anim, (lv_anim_exec_xcb_t)lv_obj_set_x);
+            lv_anim_set_values(&game_over_label_anim, -SCREEN_WIDTH, SCREEN_WIDTH);
+            lv_anim_set_time(&game_over_label_anim, 5000);
+            lv_anim_set_repeat_count(&game_over_label_anim, LV_ANIM_REPEAT_INFINITE);
+            lv_anim_set_playback_time(&game_over_label_anim, 5000);
+            lv_anim_set_playback_delay(&game_over_label_anim, 100);
+            lv_anim_start(&game_over_label_anim);
+        }
 
         return;
     }
@@ -216,6 +219,20 @@ void display_snake(int gameStatus, lv_scr_load_anim_t anim_type)
 
 void game_snake_gui_del(void)
 {
+
+    // 释放贪吃蛇的身体
+    for (int i = 0; i < snakeLength; i++)
+    {
+        if (snake[i].body != NULL)
+        {
+            lv_obj_del(snake[i].body);
+            snake[i].body = NULL;
+        }
+    }
+    snakeLength = 1;
+    executed = 0;
+
+    // 释放贪吃蛇头部
     if (NULL != game_snake_gui)
     {
         lv_obj_clean(game_snake_gui);
@@ -264,7 +281,7 @@ void update_driection(Direction dir)
             break;
         }
     }
-    
+
     // 更新移动方向
     direction = dir;
 }
