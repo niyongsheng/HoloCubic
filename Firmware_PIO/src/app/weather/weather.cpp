@@ -7,13 +7,14 @@
 #include "ArduinoJson.h"
 #include <esp32-hal-timer.h>
 #include <map>
+#include <string>
 
 #define WEATHER_APP_NAME "Weather"
 #define WEATHER_NOW_API "https://www.yiketianqi.com/free/day?appid=%s&appsecret=%s&unescape=1&city=%s"
 #define WEATHER_NOW_API_UPDATE "https://yiketianqi.com/api?unescape=1&version=v6&appid=%s&appsecret=%s&city=%s"
-#define WEATHER_NOW_API_NEWEST "https://v1.yiketianqi.com/api?unescape=1&version=v91&appid=%s&appsecret=%s&city=%s"     // USE API
-#define WEATHER_DALIY_API "https://v1.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"                // USE API
-#define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"                                    // USE API
+#define WEATHER_NOW_API_NEWEST "https://v1.yiketianqi.com/api?unescape=1&version=v91&appid=%s&appsecret=%s&city=%s" // USE API
+#define WEATHER_DALIY_API "https://v1.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"            // USE API
+#define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"                                // USE API
 #define WEATHER_PAGE_SIZE 2
 #define UPDATE_WEATHER 0x01       // 更新天气
 #define UPDATE_DALIY_WEATHER 0x02 // 更新每天天气
@@ -28,8 +29,8 @@ struct WT_Config
     String tianqi_addr;                  // tianqiapid 的地址（填中文）
     unsigned long weatherUpdataInterval; // 天气更新的时间间隔(s)
     unsigned long timeUpdataInterval;    // 日期时钟更新的时间间隔(s)
-    String dingding_accesstoken; 
-    String dingding_userid; 
+    String dingding_accesstoken;
+    String dingding_userid;
 };
 
 static void write_config(WT_Config *cfg)
@@ -66,8 +67,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        cfg->dingding_accesstoken = "9e3da2ed7d883663bb5c4fb1dbdf41f1";
-        cfg->dingding_userid = "1122725802";
+        cfg->dingding_accesstoken = "e0d12600cbcacce9492060b0ee2e65f6";
+        cfg->dingding_userid = "http://chandao.58arpa.com";
         write_config(cfg);
     }
     else
@@ -206,41 +207,39 @@ static void get_weather(void)
 
 static void get_message(void)
 {
-    // 获取钉钉所有@我的消息
+    // 获取禅道bug数量
     if (WL_CONNECTED != WiFi.status())
         return;
 
+    String url = cfg_data.dingding_userid + "/index.php?m=my&f=bug"; // 指派给我的bug
+    // String url = cfg_data.dingding_userid + "/index.php?m=my&f=bug&type=resolvedBy"; // 已解决的bug
+    String cookieValue = "zentaosid=" + cfg_data.dingding_accesstoken;
     HTTPClient http;
-    http.setTimeout(1000);
-    char api[128] = {0};
-    snprintf(api, 128, "https://oapi.dingtalk.com/message/list_message?access_token=%s&cursor=0&size=20", cfg_data.dingding_accesstoken.c_str());
-    Serial.print("API = ");
-    Serial.println(api);
-    http.begin(api);
-    
-        int httpCode = http.GET();
+    http.setTimeout(5000);
+    http.begin(url);
+    http.addHeader("Cookie", cookieValue.c_str(), true, true);
+    int httpCode = http.GET();
     if (httpCode > 0)
     {
-        // file found at server
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
         {
-            String payload = http.getString();
-            Serial.println(payload);
-            DynamicJsonDocument doc(2560); // 注意数据量大小
-            deserializeJson(doc, payload);
-
-            // 获取消息数
-            JsonObject sk = doc.as<JsonObject>();
-            int count = sk["count"].as<int>();
-            Serial.println(count);
-            // 更新msglabel
-            if (count > 0)
+            String html = http.getString();
+            // run_data->wea.msgCount = html.length();
+            String assignedToStart = "<span class='label label-light label-badge'>";
+            String assignedToEnd = "</span>";
+            size_t assignedToStartPos = html.indexOf(assignedToStart);
+            if (assignedToStartPos != -1)
             {
-                run_data->wea.msgCount = count;
-            }
-            else
-            {
-                run_data->wea.msgCount = 0;
+                assignedToStartPos += assignedToStart.length();
+                size_t assignedToEndPos = html.indexOf(assignedToEnd, assignedToStartPos);
+                if (assignedToEndPos != -1)
+                {
+                    String bug_count_str = html.substring(assignedToStartPos, assignedToEndPos);
+                    // run_data->wea.msgCount = bug_count_str.length();
+                    int bug_count = bug_count_str.toInt();
+                    run_data->wea.msgCount = bug_count;
+                    // run_data->wea.msgCount = -11;
+                }
             }
         }
     }
@@ -480,6 +479,7 @@ static void task_update(void *parameter)
         if (run_data->update_type & UPDATE_WEATHER)
         {
             get_weather();
+            get_message();
             if (run_data->clock_page == 0)
             {
                 display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
@@ -526,6 +526,7 @@ static void weather_message_handle(const char *from, const char *to,
             run_data->update_type |= UPDATE_WEATHER;
 
             get_weather();
+            get_message();
             if (run_data->clock_page == 0)
             {
                 display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
@@ -586,11 +587,11 @@ static void weather_message_handle(const char *from, const char *to,
         }
         else if (!strcmp(param_key, "dingding_accesstoken"))
         {
-            snprintf((char *)ext_info, 32, "%s", cfg_data.dingding_accesstoken.c_str());
+            snprintf((char *)ext_info, 128, "%s", cfg_data.dingding_accesstoken.c_str());
         }
         else if (!strcmp(param_key, "dingding_userid"))
         {
-            snprintf((char *)ext_info, 32, "%s", cfg_data.dingding_userid.c_str());
+            snprintf((char *)ext_info, 128, "%s", cfg_data.dingding_userid.c_str());
         }
         else
         {

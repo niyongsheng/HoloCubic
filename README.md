@@ -2,7 +2,7 @@
 
 ![(logo)](./logo.png)
 ===
-![Pages](https://img.shields.io/badge/Version-1.0.4-brightgreen.svg?style=flat-square)
+![Pages](https://img.shields.io/badge/Version-1.0.5-brightgreen.svg?style=flat-square)
 ===
 
 > 基于`稚晖君`大佬的开源项目[HoloCubic](https://github.com/peng-zhihui/HoloCubic)的全息桌面站。<br>
@@ -15,9 +15,10 @@
 
 
 ## 功能:
-- [x] 时钟气象站：[PuYuuu](https://github.com/PuYuuu)<br>
-`'tianqi_appid''tianqi_appsecret'`[申请地址](https://www.yiketianqi.com/user/login)
-`'dingding_accesstoken''dingding_userid'`[钉钉开放平台](https://open.dingtalk.com)
+- [x] 时钟气象站：[PuYuuu](https://github.com/PuYuuu)
+<br>`'tianqi_appid''tianqi_appsecret'`[申请地址](https://www.yiketianqi.com/user/login)
+<br>`'zentaosid''url'`zentao\禅道BUG
+<!-- `'dingding_accesstoken''dingding_userid'`[钉钉开放平台](https://open.dingtalk.com) -->
 - [x] PC资源监控：[Jumping99](https://github.com/Jumping99)<br>
 安装[AIDA64](https://www.aida64.com/downloads)设置[导入](https://www.bilibili.com/video/av200592305)配置文件[aida64_setting.rslcd](https://github.com/niyongsheng/HoloCubic/blob/main/Firmware_PIO/src/app/pc_resource/aida64_setting.rslcd)
 - [x] 屏幕分享：[投屏软件240*240|50%](https://gitee.com/superddg123/esp32-TFT)

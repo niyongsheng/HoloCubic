@@ -75,8 +75,8 @@ String file_size(int bytes)
                         "<label class=\"input\"><span>TianQi 城市名（中文）</span><input type=\"text\"name=\"tianqi_addr\"value=\"%s\"></label>"             \
                         "<label class=\"input\"><span>天气更新周期（毫秒）</span><input type=\"text\"name=\"weatherUpdataInterval\"value=\"%s\"></label>" \
                         "<label class=\"input\"><span>日期更新周期（毫秒）</span><input type=\"text\"name=\"timeUpdataInterval\"value=\"%s\"></label>"    \
-                        "<label class=\"input\"><span>钉钉 AccessToken</span><input type=\"text\"name=\"dingding_accesstoken\"value=\"%s\"></label>"              \
-                        "<label class=\"input\"><span>钉钉 UserId</span><input type=\"text\"name=\"dingding_userid\"value=\"%s\"></label>"                        \
+                        "<label class=\"input\"><span>禅道 Cookie zentaosid</span><input type=\"text\"name=\"dingding_accesstoken\"value=\"%s\"></label>"              \
+                        "<label class=\"input\"><span>禅道 URL</span><input type=\"text\"name=\"dingding_userid\"value=\"%s\"></label>"                        \
                         "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
 #define WEATHER_OLD_SETTING "<form method=\"GET\" action=\"saveWeatherOldConf\">"                                                                                       \
@@ -318,8 +318,8 @@ void weather_setting()
     char tianqi_addr[32];
     char weatherUpdataInterval[32];
     char timeUpdataInterval[32];
-    char dingding_accesstoken[32];
-    char dingding_userid[32];
+    char dingding_accesstoken[128];
+    char dingding_userid[128];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_READ_CFG,
                             NULL, NULL);
