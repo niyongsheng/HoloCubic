@@ -301,6 +301,20 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     }
 }
 
+void display_message(int msgCount, lv_scr_load_anim_t anim_type)
+{
+    lv_label_set_text_fmt(msgLabel, "%d", msgCount);
+
+    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
+    {
+        lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
+    }
+    else
+    {
+        lv_scr_load(scr_1);
+    }
+}
+
 void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
 {
     display_weather_init(anim_type);

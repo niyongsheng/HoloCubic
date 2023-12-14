@@ -66,7 +66,7 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_appid = "43656176";
         cfg->tianqi_appsecret = "I42og6Lm";
         cfg->tianqi_addr = "临沂";
-        cfg->weatherUpdataInterval = 3600000; // 天气更新的时间间隔(60min)
+        cfg->weatherUpdataInterval = 1800000; // 天气更新的时间间隔(30min)
         cfg->timeUpdataInterval = 10800000;   // 日期时钟更新的时间间隔(3hour)
         cfg->custom_secret = "775053dfafe1ff0be68b600c42a8ec42";
         cfg->custom_remark = "http://chandao.58arpa.com";
@@ -207,7 +207,10 @@ static void get_weather(void)
             }
 
             // 风速
-            strcpy(run_data->wea.windSpeed, data["win_speed"].as<String>().c_str());
+            String winSpeed = data["win_speed"].as<String>();
+            winSpeed.replace("转", "->");
+            strcpy(run_data->wea.windSpeed, winSpeed.c_str());
+            // 风力
             // run_data->wea.windLevel = windLevelAnalyse(data["win_level"].as<String>());
 
             // 空气质量
@@ -505,7 +508,7 @@ static void task_update(void *parameter)
             get_message();
             if (run_data->clock_page == 0)
             {
-                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+                display_message(run_data->wea.msgCount, LV_SCR_LOAD_ANIM_NONE);
             }
             run_data->update_type &= (~UPDATE_OTH);
         }
@@ -552,15 +555,15 @@ static void weather_message_handle(const char *from, const char *to,
         int event_id = (int)message;
         switch (event_id)
         {
-        case UPDATE_OTH:
+        case UPDATE_OTHER:
         {
             Serial.print(F("other update.\n"));
-            run_data->update_type |= UPDATE_OTHER;
+            run_data->update_type |= UPDATE_OTH;
 
             get_message();
             if (run_data->clock_page == 0)
             {
-                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+                display_message(run_data->wea.msgCount, LV_SCR_LOAD_ANIM_NONE);
             }
         };
         break;

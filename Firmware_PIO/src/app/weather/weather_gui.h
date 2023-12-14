@@ -8,9 +8,9 @@ struct Weather
     int humidity;     // 湿度
     int maxTemp;      // 最高气温
     int minTemp;      // 最低气温
-    char windDir[20];
+    char windDir[30];
     char cityname[10]; // 城市名
-    char windSpeed[10];
+    char windSpeed[16];
     int windLevel;
     int airQulity;
 
@@ -45,6 +45,7 @@ extern "C"
     void display_curve_init(lv_scr_load_anim_t anim_type);
     void display_curve(short maxT[], short minT[], lv_scr_load_anim_t anim_type);
     void display_weather_init(lv_scr_load_anim_t anim_type);
+    void display_message(int msgCount, lv_scr_load_anim_t anim_type);
     void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type);
     void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type);
     void weather_gui_release(void);
