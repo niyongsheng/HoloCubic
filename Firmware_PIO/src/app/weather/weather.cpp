@@ -68,7 +68,7 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 3600000; // 天气更新的时间间隔(60min)
         cfg->timeUpdataInterval = 10800000;   // 日期时钟更新的时间间隔(3hour)
-        cfg->custom_secret = "e0d12600cbcacce9492060b0ee2e65f6";
+        cfg->custom_secret = "775053dfafe1ff0be68b600c42a8ec42";
         cfg->custom_remark = "http://chandao.58arpa.com";
         write_config(cfg);
     }
@@ -181,8 +181,7 @@ static void get_weather(void)
             run_data->wea.maxTemp = data["tem1"].as<int>();
             run_data->wea.minTemp = data["tem2"].as<int>();
 
-            // 获取风向
-            // 获取当前时间小时数
+            // 根据当前时间小时数，获取对应的风向
             int hour = run_data->g_rtc.getHour(true);
             char currentHour[5];
             sprintf(currentHour, "%02d时", hour);
@@ -192,17 +191,26 @@ static void get_weather(void)
                 JsonObject hourData = v.as<JsonObject>();
                 if (hourData["hours"].as<String>().equals(currentHour))
                 {
-                    String win = hourData["win"].as<String>();
-                    if (win.indexOf("无持续") != -1)
-                        win = "微风";
-
-                    strcpy(run_data->wea.windDir, win.c_str());
+                    strcpy(run_data->wea.windDir, hourData["win"].as<String>().c_str());
                     break;
                 }
             }
-            // strcpy(run_data->wea.windDir, data["win"].as<String>().c_str());
-            // run_data->wea.windLevel = windLevelAnalyse(data["win_speed"].as<String>());
+
+            // 风向
+            if (run_data->wea.windDir == NULL || strlen(run_data->wea.windDir) == 0)
+            {
+                strcpy(run_data->wea.windDir, data["win"][0].as<String>().c_str());
+            }
+            if (strcmp(run_data->wea.windDir, "无持续风向") == 0)
+            {
+                strcpy(run_data->wea.windDir, "微风");
+            }
+
+            // 风速
             strcpy(run_data->wea.windSpeed, data["win_speed"].as<String>().c_str());
+            // run_data->wea.windLevel = windLevelAnalyse(data["win_level"].as<String>());
+
+            // 空气质量
             run_data->wea.airQulity = airQulityLevel(data["air"].as<int>());
         }
     }
@@ -236,7 +244,7 @@ static void get_message(void)
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
         {
             String html = http.getString();
-            // run_data->wea.msgCount = html.length();
+            run_data->wea.msgCount = 0;
             String assignedToStart = "<span class='label label-light label-badge'>";
             String assignedToEnd = "</span>";
             size_t assignedToStartPos = html.indexOf(assignedToStart);
