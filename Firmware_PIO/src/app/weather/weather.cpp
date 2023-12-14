@@ -247,7 +247,7 @@ static void get_message(void)
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
         {
             String html = http.getString();
-            run_data->wea.msgCount = 0;
+            // run_data->wea.msgCount = http.getSize();
             String assignedToStart = "<span class='label label-light label-badge'>";
             String assignedToEnd = "</span>";
             size_t assignedToStartPos = html.indexOf(assignedToStart);
