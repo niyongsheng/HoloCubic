@@ -75,8 +75,8 @@ String file_size(int bytes)
                         "<label class=\"input\"><span>TianQi 城市名（中文）</span><input type=\"text\"name=\"tianqi_addr\"value=\"%s\"></label>"             \
                         "<label class=\"input\"><span>天气更新周期（毫秒）</span><input type=\"text\"name=\"weatherUpdataInterval\"value=\"%s\"></label>" \
                         "<label class=\"input\"><span>日期更新周期（毫秒）</span><input type=\"text\"name=\"timeUpdataInterval\"value=\"%s\"></label>"    \
-                        "<label class=\"input\"><span>禅道 Cookie zentaosid</span><input type=\"text\"name=\"dingding_accesstoken\"value=\"%s\"></label>"              \
-                        "<label class=\"input\"><span>禅道 URL</span><input type=\"text\"name=\"dingding_userid\"value=\"%s\"></label>"                        \
+                        "<label class=\"input\"><span>禅道 Cookie zentaosid</span><input type=\"text\"name=\"custom_secret\"value=\"%s\"></label>"              \
+                        "<label class=\"input\"><span>禅道 URL</span><input type=\"text\"name=\"custom_remark\"value=\"%s\"></label>"                        \
                         "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
 #define WEATHER_OLD_SETTING "<form method=\"GET\" action=\"saveWeatherOldConf\">"                                                                                       \
@@ -318,8 +318,8 @@ void weather_setting()
     char tianqi_addr[32];
     char weatherUpdataInterval[32];
     char timeUpdataInterval[32];
-    char dingding_accesstoken[128];
-    char dingding_userid[128];
+    char custom_secret[128];
+    char custom_remark[128];
     // 读取数据
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_READ_CFG,
                             NULL, NULL);
@@ -334,15 +334,15 @@ void weather_setting()
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM,
                             (void *)"timeUpdataInterval", timeUpdataInterval);
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM,
-                            (void *)"dingding_accesstoken", dingding_accesstoken);
+                            (void *)"custom_secret", custom_secret);
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM,
-                            (void *)"dingding_userid", dingding_userid);
+                            (void *)"custom_remark", custom_remark);
     sprintf(buf, WEATHER_SETTING, tianqi_appid,
             tianqi_appsecret, tianqi_addr,
             weatherUpdataInterval,
             timeUpdataInterval,
-            dingding_accesstoken,
-            dingding_userid);
+            custom_secret,
+            custom_remark);
     webpage = buf;
     Send_HTML(webpage);
 }
@@ -620,12 +620,12 @@ void saveWeatherConf(void)
                             (void *)server.arg("timeUpdataInterval").c_str());
     app_controller->send_to(SERVER_APP_NAME, "Weather",
                             APP_MESSAGE_SET_PARAM,
-                            (void *)"dingding_accesstoken",
-                            (void *)server.arg("dingding_accesstoken").c_str());
+                            (void *)"custom_secret",
+                            (void *)server.arg("custom_secret").c_str());
     app_controller->send_to(SERVER_APP_NAME, "Weather",
                             APP_MESSAGE_SET_PARAM,
-                            (void *)"dingding_userid",
-                            (void *)server.arg("dingding_userid").c_str());
+                            (void *)"custom_remark",
+                            (void *)server.arg("custom_remark").c_str());
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_WRITE_CFG,
                             NULL, NULL);

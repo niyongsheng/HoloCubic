@@ -30,8 +30,8 @@ struct WT_Config
     String tianqi_addr;                  // tianqiapid 的地址（填中文）
     unsigned long weatherUpdataInterval; // 天气更新的时间间隔(s)
     unsigned long timeUpdataInterval;    // 日期时钟更新的时间间隔(s)
-    String dingding_accesstoken;
-    String dingding_userid;
+    String custom_secret;
+    String custom_remark;
 };
 
 static void write_config(WT_Config *cfg)
@@ -48,8 +48,8 @@ static void write_config(WT_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%lu\n", cfg->timeUpdataInterval);
     w_data += tmp;
-    w_data = w_data + cfg->dingding_accesstoken + "\n";
-    w_data = w_data + cfg->dingding_userid + "\n";
+    w_data = w_data + cfg->custom_secret + "\n";
+    w_data = w_data + cfg->custom_remark + "\n";
     g_flashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
 }
 
@@ -68,8 +68,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 3600000; // 天气更新的时间间隔(60min)
         cfg->timeUpdataInterval = 10800000;   // 日期时钟更新的时间间隔(3hour)
-        cfg->dingding_accesstoken = "e0d12600cbcacce9492060b0ee2e65f6";
-        cfg->dingding_userid = "http://chandao.58arpa.com";
+        cfg->custom_secret = "e0d12600cbcacce9492060b0ee2e65f6";
+        cfg->custom_remark = "http://chandao.58arpa.com";
         write_config(cfg);
     }
     else
@@ -82,8 +82,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = param[2];
         cfg->weatherUpdataInterval = atol(param[3]);
         cfg->timeUpdataInterval = atol(param[4]);
-        cfg->dingding_accesstoken = param[5];
-        cfg->dingding_userid = param[6];
+        cfg->custom_secret = param[5];
+        cfg->custom_remark = param[6];
     }
 }
 
@@ -220,11 +220,11 @@ static void get_message(void)
         return;
 
     char url[128] = {0};
-    snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug", cfg_data.dingding_userid.c_str()); // 指给我的bug
-    // snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug&type=resolvedBy", cfg_data.dingding_userid.c_str()); // 已解决的bug
+    snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug", cfg_data.custom_remark.c_str()); // 指给我的bug
+    // snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug&type=resolvedBy", cfg_data.custom_remark.c_str()); // 已解决的bug
 
     char cookieValue[128] = {0};
-    snprintf(cookieValue, sizeof(cookieValue), "zentaosid=%s", cfg_data.dingding_accesstoken.c_str());
+    snprintf(cookieValue, sizeof(cookieValue), "zentaosid=%s", cfg_data.custom_secret.c_str());
 
     HTTPClient http;
     http.setTimeout(5000);
@@ -368,7 +368,7 @@ static int weather_init(AppController *sys)
     // 初始化运行时参数
     run_data = (WeatherAppRunData *)calloc(1, sizeof(WeatherAppRunData));
     memset((char *)&run_data->wea, 0, sizeof(Weather));
-    run_data->preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00
+    run_data->preNetTimestamp = 1672531200000; // 上一次的网络时间戳 初始化为2023-01-01 00:00:00
     run_data->errorNetTimestamp = 2;
     run_data->preLocalTimestamp = GET_SYS_MILLIS(); // 上一次的本地机器时间戳
     run_data->clock_page = 0;
@@ -620,13 +620,13 @@ static void weather_message_handle(const char *from, const char *to,
         {
             snprintf((char *)ext_info, 32, "%lu", cfg_data.timeUpdataInterval);
         }
-        else if (!strcmp(param_key, "dingding_accesstoken"))
+        else if (!strcmp(param_key, "custom_secret"))
         {
-            snprintf((char *)ext_info, 128, "%s", cfg_data.dingding_accesstoken.c_str());
+            snprintf((char *)ext_info, 128, "%s", cfg_data.custom_secret.c_str());
         }
-        else if (!strcmp(param_key, "dingding_userid"))
+        else if (!strcmp(param_key, "custom_remark"))
         {
-            snprintf((char *)ext_info, 128, "%s", cfg_data.dingding_userid.c_str());
+            snprintf((char *)ext_info, 128, "%s", cfg_data.custom_remark.c_str());
         }
         else
         {
@@ -658,13 +658,13 @@ static void weather_message_handle(const char *from, const char *to,
         {
             cfg_data.timeUpdataInterval = atol(param_val);
         }
-        else if (!strcmp(param_key, "dingding_accesstoken"))
+        else if (!strcmp(param_key, "custom_secret"))
         {
-            cfg_data.dingding_accesstoken = param_val;
+            cfg_data.custom_secret = param_val;
         }
-        else if (!strcmp(param_key, "dingding_userid"))
+        else if (!strcmp(param_key, "custom_remark"))
         {
-            cfg_data.dingding_userid = param_val;
+            cfg_data.custom_remark = param_val;
         }
         else
         {
