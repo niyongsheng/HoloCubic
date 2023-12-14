@@ -10,6 +10,7 @@ struct Weather
     int minTemp;      // 最低气温
     char windDir[20];
     char cityname[10]; // 城市名
+    char windSpeed[10];
     int windLevel;
     int airQulity;
 

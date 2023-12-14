@@ -19,6 +19,7 @@
 #define UPDATE_WEATHER 0x01       // 更新天气
 #define UPDATE_DALIY_WEATHER 0x02 // 更新每天天气
 #define UPDATE_TIME 0x04          // 更新时间
+#define UPDATE_OTH 0x07           // 更新其他数据
 
 // 天气的持久化配置
 #define WEATHER_CONFIG_PATH "/weather.cfg"
@@ -65,8 +66,8 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_appid = "43656176";
         cfg->tianqi_appsecret = "I42og6Lm";
         cfg->tianqi_addr = "临沂";
-        cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
-        cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
+        cfg->weatherUpdataInterval = 3600000; // 天气更新的时间间隔(60min)
+        cfg->timeUpdataInterval = 10800000;   // 日期时钟更新的时间间隔(3hour)
         cfg->dingding_accesstoken = "e0d12600cbcacce9492060b0ee2e65f6";
         cfg->dingding_userid = "http://chandao.58arpa.com";
         write_config(cfg);
@@ -88,6 +89,7 @@ static void read_config(WT_Config *cfg)
 
 struct WeatherAppRunData
 {
+    unsigned long preOtherMillis;   // 上一回更新其他数据的毫秒数
     unsigned long preWeatherMillis; // 上一回更新天气时的毫秒数
     unsigned long preTimeMillis;    // 更新时间计数器
     long long preNetTimestamp;      // 上一次的网络时间戳
@@ -111,7 +113,8 @@ enum wea_event_Id
 {
     UPDATE_NOW,
     UPDATE_NTP,
-    UPDATE_DAILY
+    UPDATE_DAILY,
+    UPDATE_OTHER
 };
 
 std::map<String, int> weatherMap = {{"qing", 0}, {"yin", 1}, {"yu", 2}, {"yun", 3}, {"bingbao", 4}, {"wu", 5}, {"shachen", 6}, {"lei", 7}, {"xue", 8}};
@@ -189,12 +192,17 @@ static void get_weather(void)
                 JsonObject hourData = v.as<JsonObject>();
                 if (hourData["hours"].as<String>().equals(currentHour))
                 {
-                    strcpy(run_data->wea.windDir, hourData["win"].as<String>().c_str());
+                    String win = hourData["win"].as<String>();
+                    if (win.indexOf("无持续") != -1)
+                        win = "微风";
+
+                    strcpy(run_data->wea.windDir, win.c_str());
                     break;
                 }
             }
             // strcpy(run_data->wea.windDir, data["win"].as<String>().c_str());
-            run_data->wea.windLevel = windLevelAnalyse(data["win_speed"].as<String>());
+            // run_data->wea.windLevel = windLevelAnalyse(data["win_speed"].as<String>());
+            strcpy(run_data->wea.windSpeed, data["win_speed"].as<String>().c_str());
             run_data->wea.airQulity = airQulityLevel(data["air"].as<int>());
         }
     }
@@ -211,13 +219,17 @@ static void get_message(void)
     if (WL_CONNECTED != WiFi.status())
         return;
 
-    String url = cfg_data.dingding_userid + "/index.php?m=my&f=bug"; // 指派给我的bug
-    // String url = cfg_data.dingding_userid + "/index.php?m=my&f=bug&type=resolvedBy"; // 已解决的bug
-    String cookieValue = "zentaosid=" + cfg_data.dingding_accesstoken;
+    char url[128] = {0};
+    snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug", cfg_data.dingding_userid.c_str()); // 指给我的bug
+    // snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug&type=resolvedBy", cfg_data.dingding_userid.c_str()); // 已解决的bug
+
+    char cookieValue[128] = {0};
+    snprintf(cookieValue, sizeof(cookieValue), "zentaosid=%s", cfg_data.dingding_accesstoken.c_str());
+
     HTTPClient http;
     http.setTimeout(5000);
     http.begin(url);
-    http.addHeader("Cookie", cookieValue.c_str(), true, true);
+    http.addHeader("Cookie", cookieValue, true, true);
     int httpCode = http.GET();
     if (httpCode > 0)
     {
@@ -235,10 +247,7 @@ static void get_message(void)
                 if (assignedToEndPos != -1)
                 {
                     String bug_count_str = html.substring(assignedToStartPos, assignedToEndPos);
-                    // run_data->wea.msgCount = bug_count_str.length();
-                    int bug_count = bug_count_str.toInt();
-                    run_data->wea.msgCount = bug_count;
-                    // run_data->wea.msgCount = -11;
+                    run_data->wea.msgCount = atoi(bug_count_str.c_str());
                 }
             }
         }
@@ -363,6 +372,7 @@ static int weather_init(AppController *sys)
     run_data->errorNetTimestamp = 2;
     run_data->preLocalTimestamp = GET_SYS_MILLIS(); // 上一次的本地机器时间戳
     run_data->clock_page = 0;
+    run_data->preOtherMillis = 0;
     run_data->preWeatherMillis = 0;
     run_data->preTimeMillis = 0;
     // 强制更新
@@ -415,6 +425,12 @@ static void weather_process(AppController *sys,
     if (run_data->clock_page == 0)
     {
         display_weather(run_data->wea, anim_type);
+        if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(60000, &run_data->preOtherMillis, false))
+        {
+            sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
+                         APP_MESSAGE_WIFI_CONN, (void *)UPDATE_OTHER, NULL);
+        }
+
         if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false))
         {
             sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
@@ -476,10 +492,18 @@ static void task_update(void *parameter)
     // 数据更新任务
     while (1)
     {
+        if (run_data->update_type & UPDATE_OTH)
+        {
+            get_message();
+            if (run_data->clock_page == 0)
+            {
+                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+            }
+            run_data->update_type &= (~UPDATE_OTH);
+        }
         if (run_data->update_type & UPDATE_WEATHER)
         {
             get_weather();
-            get_message();
             if (run_data->clock_page == 0)
             {
                 display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
@@ -520,13 +544,24 @@ static void weather_message_handle(const char *from, const char *to,
         int event_id = (int)message;
         switch (event_id)
         {
+        case UPDATE_OTH:
+        {
+            Serial.print(F("other update.\n"));
+            run_data->update_type |= UPDATE_OTHER;
+
+            get_message();
+            if (run_data->clock_page == 0)
+            {
+                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+            }
+        };
+        break;
         case UPDATE_NOW:
         {
             Serial.print(F("weather update.\n"));
             run_data->update_type |= UPDATE_WEATHER;
 
             get_weather();
-            get_message();
             if (run_data->clock_page == 0)
             {
                 display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
