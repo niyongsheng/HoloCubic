@@ -270,7 +270,6 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     }
     lv_label_set_text(btnLabel, airQualityCh[weaInfo.airQulity]);
     lv_img_set_src(weatherImg, weaImage_map[weaInfo.weather_code]);
-    // 下面这行代码可能会出错
     lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%s.   ", weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windSpeed);
     // lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%d 级.   ", weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windLevel);
 
@@ -278,65 +277,27 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     lv_label_set_text_fmt(tempLabel, "%2d°C", weaInfo.temperature);
     lv_bar_set_value(humiBar, weaInfo.humidity, LV_ANIM_ON);
     lv_label_set_text_fmt(humiLabel, "%d%%", weaInfo.humidity);
-
-    lv_label_set_text_fmt(msgLabel, "%d", weaInfo.msgCount);
-
-    // // 绘制图形
-    // lv_obj_align(weatherImg, NULL, LV_ALIGN_TOP_RIGHT, -10, 10);
-    // lv_obj_align(cityLabel, NULL, LV_ALIGN_TOP_LEFT, 20, 15);
-    // lv_obj_align(txtLabel, NULL, LV_ALIGN_TOP_LEFT, 0, 50);
-    // lv_obj_align(tempImg, NULL, LV_ALIGN_LEFT_MID, 10, 70);
-    // lv_obj_align(tempBar, NULL, LV_ALIGN_LEFT_MID, 35, 70);
-    // lv_obj_align(tempLabel, NULL, LV_ALIGN_LEFT_MID, 100, 70);
-    // lv_obj_align(humiImg, NULL, LV_ALIGN_LEFT_MID, 0, 100);
-    // lv_obj_align(humiBar, NULL, LV_ALIGN_LEFT_MID, 35, 100);
-    // lv_obj_align(humiLabel, NULL, LV_ALIGN_LEFT_MID, 100, 100);
-    // lv_obj_align(spaceImg, NULL, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
-
-    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    {
-        lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    }
-    else
-    {
-        lv_scr_load(scr_1);
-    }
+    // lv_label_set_text_fmt(msgLabel, "%d", weaInfo.msgCount);
 }
 
 void display_message(int msgCount, lv_scr_load_anim_t anim_type)
 {
-    lv_label_set_text_fmt(msgLabel, "%d", msgCount);
+    display_weather_init(anim_type);
 
-    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
+    if (msgLabel != NULL)
     {
-        lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    }
-    else
-    {
-        lv_scr_load(scr_1);
+        lv_label_set_text_fmt(msgLabel, "%d", msgCount);
     }
 }
 
 void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
 {
     display_weather_init(anim_type);
+
     lv_label_set_text_fmt(clockLabel_1, "%02d#ffa500 %02d#", timeInfo.hour, timeInfo.minute);
     lv_label_set_text_fmt(clockLabel_2, "%02d", timeInfo.second);
     lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day,
                           weekDayCh[timeInfo.weekday]);
-
-    // lv_obj_align(clockLabel_1, NULL, LV_ALIGN_LEFT_MID, 0, 10);
-    // lv_obj_align(clockLabel_2, NULL, LV_ALIGN_LEFT_MID, 165, 9);
-    // lv_obj_align(dateLabel, NULL, LV_ALIGN_LEFT_MID, 10, 32);
-
-    // if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    // {
-    //     lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    // }
-    // else
-    // {
-    //     lv_scr_load(scr_1);
-    // }
 }
 
 void weather_gui_release(void)
@@ -360,6 +321,8 @@ void weather_gui_release(void)
         humiBar = NULL;
         humiLabel = NULL;
         spaceImg = NULL;
+        msgBg = NULL;
+        msgLabel = NULL;
     }
 
     if (scr_2 != NULL)

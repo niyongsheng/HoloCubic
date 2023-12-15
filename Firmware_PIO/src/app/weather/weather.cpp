@@ -192,6 +192,7 @@ static void get_weather(void)
                 if (hourData["hours"].as<String>().equals(currentHour))
                 {
                     strcpy(run_data->wea.windDir, hourData["win"].as<String>().c_str());
+                    strcpy(run_data->wea.windSpeed, hourData["win_speed"].as<String>().c_str());
                     break;
                 }
             }
@@ -207,9 +208,14 @@ static void get_weather(void)
             }
 
             // 风速
-            String winSpeed = data["win_speed"].as<String>();
-            winSpeed.replace("转", "->");
-            strcpy(run_data->wea.windSpeed, winSpeed.c_str());
+            if (run_data->wea.windSpeed == NULL || strlen(run_data->wea.windSpeed) == 0)
+            {
+                strcpy(run_data->wea.windSpeed, data["win_speed"].as<String>().c_str());
+            }
+            String windSpeed = run_data->wea.windSpeed;
+            windSpeed.replace("转", "->");
+            strcpy(run_data->wea.windSpeed, windSpeed.c_str());
+
             // 风力
             // run_data->wea.windLevel = windLevelAnalyse(data["win_level"].as<String>());
 
