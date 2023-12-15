@@ -68,7 +68,7 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 1800000; // 天气更新的时间间隔(30min)
         cfg->timeUpdataInterval = 10800000;   // 日期时钟更新的时间间隔(3hour)
-        cfg->custom_secret = "775053dfafe1ff0be68b600c42a8ec42";
+        cfg->custom_secret = "facd0bd22788839f650281d49a14852f";
         cfg->custom_remark = "http://chandao.58arpa.com";
         write_config(cfg);
     }
@@ -423,6 +423,7 @@ static void weather_process(AppController *sys,
     {
         anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
         run_data->clock_page = (run_data->clock_page + 1) % WEATHER_PAGE_SIZE;
+        delay(500);
     }
     else if (TURN_LEFT == act_info->active)
     {
@@ -430,6 +431,7 @@ static void weather_process(AppController *sys,
         // 以下等效与 clock_page = (clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
         // +3为了不让数据溢出成负数，而导致取模逻辑错误
         run_data->clock_page = (run_data->clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
+        delay(500);
     }
 
     // 界面刷新
