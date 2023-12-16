@@ -8,6 +8,7 @@
 #include <esp32-hal-timer.h>
 #include <map>
 #include <string>
+#include <mutex>
 
 #define WEATHER_APP_NAME "Weather"
 #define WEATHER_NOW_API "https://www.yiketianqi.com/free/day?appid=%s&appsecret=%s&unescape=1&city=%s"
@@ -20,6 +21,9 @@
 #define UPDATE_DALIY_WEATHER 0x02 // 更新每天天气
 #define UPDATE_TIME 0x04          // 更新时间
 #define UPDATE_OTH 0x07           // 更新其他数据
+
+// 互斥锁
+std::mutex methodMutex;
 
 // 天气的持久化配置
 #define WEATHER_CONFIG_PATH "/weather.cfg"
@@ -217,7 +221,10 @@ static void get_weather(void)
             strcpy(run_data->wea.windSpeed, windSpeed.c_str());
 
             // 风力
-            // run_data->wea.windLevel = windLevelAnalyse(data["win_level"].as<String>());
+            if (data.containsKey("win_level"))
+            {
+                run_data->wea.windLevel = windLevelAnalyse(data["win_level"].as<String>());
+            }
 
             // 空气质量
             run_data->wea.airQulity = airQulityLevel(data["air"].as<int>());
@@ -232,23 +239,33 @@ static void get_weather(void)
 
 static void get_message(void)
 {
-    // 获取禅道bug数量
-    if (WL_CONNECTED != WiFi.status() || cfg_data.custom_secret.length() == 0 || cfg_data.custom_remark.length() == 0)
+    // 保证线程安全，避免死锁
+    std::lock_guard<std::mutex> lock(methodMutex);
+
+    if (cfg_data.custom_secret.length() == 0 || cfg_data.custom_remark.length() == 0 || WL_CONNECTED != WiFi.status())
         return;
 
-    String url = String(cfg_data.custom_remark) + "/index.php?m=my&f=bug";
+    String api = String(cfg_data.custom_remark) + "/index.php?m=my&f=bug";
     String cookieValue = "zentaosid=" + cfg_data.custom_secret;
+
+    Serial.print("API = ");
+    Serial.println(api);
 
     HTTPClient http;
     http.setTimeout(5000);
-    http.begin(url);
+    http.begin(api);
     http.addHeader("Cookie", cookieValue);
     int httpCode = http.GET();
     if (httpCode > 0)
     {
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
         {
+            int size = http.getSize();
+            Serial.print("SIZE = ");
+            Serial.println(size);
+
             String html = http.getString();
+            Serial.println(html.substring(0, 100));
             String assignedToStart = "<span class='label label-light label-badge'>";
             String assignedToEnd = "</span>";
             size_t assignedToStartPos = html.indexOf(assignedToStart);
@@ -366,7 +383,7 @@ static void UpdateTime_RTC(long long timestamp)
     t.minute = run_data->g_rtc.getMinute();
     t.second = run_data->g_rtc.getSecond();
     t.weekday = run_data->g_rtc.getDayofWeek();
-    Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
+    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
     AIO_LVGL_OPERATE_LOCK(display_time(t, LV_SCR_LOAD_ANIM_NONE););
 }
 
@@ -550,6 +567,13 @@ static void weather_message_handle(const char *from, const char *to,
 {
     switch (type)
     {
+    case APP_MESSAGE_WIFI_DISCONN:
+    {
+        // 取消所有网络请求
+        if (run_data != NULL)
+            run_data->update_type = 0x00;
+    }
+    break;
     case APP_MESSAGE_WIFI_CONN:
     {
         Serial.println(F("----->weather_event_notification"));

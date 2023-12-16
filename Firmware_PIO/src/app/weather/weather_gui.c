@@ -268,18 +268,17 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     display_weather_init(anim_type);
 
     lv_label_set_text(cityLabel, weaInfo.cityname);
-    if (strlen(weaInfo.cityname) > 6)
+    lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, strlen(weaInfo.cityname) > 6 ? 5 : 20, 15);
+    lv_label_set_text(btnLabel, airQualityCh[weaInfo.airQulity]);
+    lv_img_set_src(weatherImg, weaImage_map[weaInfo.weather_code]);
+    if (weaInfo.windLevel > 0)
     {
-        lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, 5, 15);
+        lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%d 级.   ", weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windLevel);
     }
     else
     {
-        lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, 20, 15);
+        lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%s.   ", weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windSpeed);
     }
-    lv_label_set_text(btnLabel, airQualityCh[weaInfo.airQulity]);
-    lv_img_set_src(weatherImg, weaImage_map[weaInfo.weather_code]);
-    lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%s.   ", weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windSpeed);
-    // lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%d 级.   ", weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windLevel);
 
     lv_bar_set_value(tempBar, weaInfo.temperature, LV_ANIM_ON);
     lv_label_set_text_fmt(tempLabel, "%2d°C", weaInfo.temperature);
