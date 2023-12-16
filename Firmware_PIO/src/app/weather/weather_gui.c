@@ -88,14 +88,15 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
     lv_label_set_text(titleLabel, "一周温度查看");
 
     chart = lv_chart_create(scr_2);
-    lv_obj_set_size(chart, 230, 180);
+    lv_obj_set_size(chart, 210, 180);
     lv_group_add_obj(lv_group_get_default(), chart);
     lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
 
     // Y轴刻度
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, -50, 50); // 设置进度条表示的温度为-50~50
     lv_obj_set_grid_cell(chart, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-    lv_obj_set_style_line_color(chart, lv_palette_main(LV_PALETTE_ORANGE), LV_PART_TICKS);
+    lv_obj_set_style_line_color(chart, lv_palette_main(LV_PALETTE_LIGHT_GREEN), LV_PART_TICKS);
+    lv_obj_set_style_text_color(chart, lv_palette_lighten(LV_PALETTE_ORANGE, 2), LV_PART_TICKS);
     lv_chart_set_axis_tick(chart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 6, 1, true, 30);
 
     // 间隔
@@ -108,7 +109,7 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
 
     // 约束绘制
     lv_obj_align(titleLabel, LV_ALIGN_TOP_MID, 0, 10);
-    lv_obj_align(chart, LV_ALIGN_CENTER, 0, 10);
+    lv_obj_align(chart, LV_ALIGN_CENTER, 15, 10);
 
     if (LV_SCR_LOAD_ANIM_NONE != anim_type)
     {
