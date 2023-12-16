@@ -91,13 +91,12 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
     lv_obj_set_size(chart, 230, 180);
     lv_group_add_obj(lv_group_get_default(), chart);
     lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
-    lv_obj_add_flag(chart, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
 
     // Y轴刻度
     lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, -50, 50); // 设置进度条表示的温度为-50~50
     lv_obj_set_grid_cell(chart, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
     lv_obj_set_style_line_color(chart, lv_palette_main(LV_PALETTE_ORANGE), LV_PART_TICKS);
-    lv_chart_set_axis_tick(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 0, 5, 1, true, 40);
+    lv_chart_set_axis_tick(chart, LV_CHART_AXIS_PRIMARY_Y, 10, 5, 6, 1, true, 30);
 
     // 间隔
     lv_chart_set_div_line_count(chart, 5, 7);
@@ -130,6 +129,15 @@ void display_curve(short maxT[], short minT[], lv_scr_load_anim_t anim_type)
         ser2->y_points[Ti] = minT[Ti] + 50;
     }
     lv_chart_refresh(chart);
+
+    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
+    {
+        lv_scr_load_anim(scr_2, anim_type, 500, 300, false);
+    }
+    else
+    {
+        lv_scr_load(scr_2);
+    }
 }
 
 void display_weather_init(lv_scr_load_anim_t anim_type)
@@ -277,17 +285,24 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     lv_label_set_text_fmt(tempLabel, "%2d°C", weaInfo.temperature);
     lv_bar_set_value(humiBar, weaInfo.humidity, LV_ANIM_ON);
     lv_label_set_text_fmt(humiLabel, "%d%%", weaInfo.humidity);
-    // lv_label_set_text_fmt(msgLabel, "%d", weaInfo.msgCount);
+    lv_label_set_text_fmt(msgLabel, "%d", weaInfo.msgCount);
+
+    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
+    {
+        lv_scr_load_anim(scr_1, anim_type, 500, 300, false);
+    }
+    else
+    {
+        lv_scr_load(scr_1);
+    }
 }
 
 void display_message(int msgCount, lv_scr_load_anim_t anim_type)
 {
     display_weather_init(anim_type);
 
-    if (msgLabel != NULL)
-    {
-        lv_label_set_text_fmt(msgLabel, "%d", msgCount);
-    }
+    lv_label_set_text_fmt(msgLabel, "%d", msgCount);
+    lv_scr_load(scr_1);
 }
 
 void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
@@ -296,8 +311,7 @@ void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
 
     lv_label_set_text_fmt(clockLabel_1, "%02d#ffa500 %02d#", timeInfo.hour, timeInfo.minute);
     lv_label_set_text_fmt(clockLabel_2, "%02d", timeInfo.second);
-    lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day,
-                          weekDayCh[timeInfo.weekday]);
+    lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day, weekDayCh[timeInfo.weekday]);
 }
 
 void weather_gui_release(void)

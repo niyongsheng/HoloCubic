@@ -68,7 +68,7 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "临沂";
         cfg->weatherUpdataInterval = 1800000; // 天气更新的时间间隔(30min)
         cfg->timeUpdataInterval = 10800000;   // 日期时钟更新的时间间隔(3hour)
-        cfg->custom_secret = "facd0bd22788839f650281d49a14852f";
+        cfg->custom_secret = "464434e7b5fedcf1397b910fa257f933";
         cfg->custom_remark = "http://chandao.58arpa.com";
         write_config(cfg);
     }
@@ -233,27 +233,22 @@ static void get_weather(void)
 static void get_message(void)
 {
     // 获取禅道bug数量
-    if (WL_CONNECTED != WiFi.status())
+    if (WL_CONNECTED != WiFi.status() || cfg_data.custom_secret.length() == 0 || cfg_data.custom_remark.length() == 0)
         return;
 
-    char url[128] = {0};
-    snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug", cfg_data.custom_remark.c_str()); // 指给我的bug
-    // snprintf(url, sizeof(url), "%s/index.php?m=my&f=bug&type=resolvedBy", cfg_data.custom_remark.c_str()); // 已解决的bug
-
-    char cookieValue[128] = {0};
-    snprintf(cookieValue, sizeof(cookieValue), "zentaosid=%s", cfg_data.custom_secret.c_str());
+    String url = String(cfg_data.custom_remark) + "/index.php?m=my&f=bug";
+    String cookieValue = "zentaosid=" + cfg_data.custom_secret;
 
     HTTPClient http;
     http.setTimeout(5000);
     http.begin(url);
-    http.addHeader("Cookie", cookieValue, true, true);
+    http.addHeader("Cookie", cookieValue);
     int httpCode = http.GET();
     if (httpCode > 0)
     {
         if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
         {
             String html = http.getString();
-            // run_data->wea.msgCount = http.getSize();
             String assignedToStart = "<span class='label label-light label-badge'>";
             String assignedToEnd = "</span>";
             size_t assignedToStartPos = html.indexOf(assignedToStart);
@@ -371,8 +366,8 @@ static void UpdateTime_RTC(long long timestamp)
     t.minute = run_data->g_rtc.getMinute();
     t.second = run_data->g_rtc.getSecond();
     t.weekday = run_data->g_rtc.getDayofWeek();
-    // Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
-    display_time(t, LV_SCR_LOAD_ANIM_NONE);
+    Serial.printf("time : %d-%d-%d\n",t.hour, t.minute, t.second);
+    AIO_LVGL_OPERATE_LOCK(display_time(t, LV_SCR_LOAD_ANIM_NONE););
 }
 
 static int weather_init(AppController *sys)
@@ -428,22 +423,20 @@ static void weather_process(AppController *sys,
     else if (TURN_RIGHT == act_info->active)
     {
         anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-        run_data->clock_page = (run_data->clock_page + 1) % WEATHER_PAGE_SIZE;
-        delay(500);
+        run_data->clock_page = 1;
+        delay(200);
     }
     else if (TURN_LEFT == act_info->active)
     {
         anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-        // 以下等效与 clock_page = (clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-        // +3为了不让数据溢出成负数，而导致取模逻辑错误
-        run_data->clock_page = (run_data->clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-        delay(500);
+        run_data->clock_page = 0;
+        delay(200);
     }
 
     // 界面刷新
     if (run_data->clock_page == 0)
     {
-        display_weather(run_data->wea, anim_type);
+        AIO_LVGL_OPERATE_LOCK(display_weather(run_data->wea, anim_type););
         if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(60000, &run_data->preOtherMillis, false))
         {
             sys->send_to(WEATHER_APP_NAME, CTRL_NAME,
@@ -469,13 +462,13 @@ static void weather_process(AppController *sys,
             UpdateTime_RTC(get_timestamp());
         }
         run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
-        display_space();
+        AIO_LVGL_OPERATE_LOCK(display_space(););
         delay(30);
     }
     else if (run_data->clock_page == 1)
     {
         // 仅在切换界面时获取一次未来天气
-        display_curve(run_data->wea.daily_max, run_data->wea.daily_min, anim_type);
+        AIO_LVGL_OPERATE_LOCK(display_curve(run_data->wea.daily_max, run_data->wea.daily_min, anim_type););
         delay(300);
     }
 }
@@ -516,7 +509,7 @@ static void task_update(void *parameter)
             get_message();
             if (run_data->clock_page == 0)
             {
-                display_message(run_data->wea.msgCount, LV_SCR_LOAD_ANIM_NONE);
+                AIO_LVGL_OPERATE_LOCK(display_message(run_data->wea.msgCount, LV_SCR_LOAD_ANIM_NONE););
             }
             run_data->update_type &= (~UPDATE_OTH);
         }
@@ -525,7 +518,7 @@ static void task_update(void *parameter)
             get_weather();
             if (run_data->clock_page == 0)
             {
-                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+                AIO_LVGL_OPERATE_LOCK(display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE););
             }
             run_data->update_type &= (~UPDATE_WEATHER);
         }
@@ -543,7 +536,7 @@ static void task_update(void *parameter)
             get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);
             if (run_data->clock_page == 1)
             {
-                display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE);
+                AIO_LVGL_OPERATE_LOCK(display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE););
             }
             run_data->update_type &= (~UPDATE_DALIY_WEATHER);
         }
@@ -571,7 +564,7 @@ static void weather_message_handle(const char *from, const char *to,
             get_message();
             if (run_data->clock_page == 0)
             {
-                display_message(run_data->wea.msgCount, LV_SCR_LOAD_ANIM_NONE);
+                AIO_LVGL_OPERATE_LOCK(display_message(run_data->wea.msgCount, LV_SCR_LOAD_ANIM_NONE););
             }
         };
         break;
@@ -583,7 +576,7 @@ static void weather_message_handle(const char *from, const char *to,
             get_weather();
             if (run_data->clock_page == 0)
             {
-                display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE);
+                AIO_LVGL_OPERATE_LOCK(display_weather(run_data->wea, LV_SCR_LOAD_ANIM_NONE););
             }
         };
         break;
@@ -607,7 +600,7 @@ static void weather_message_handle(const char *from, const char *to,
             get_daliyWeather(run_data->wea.daily_max, run_data->wea.daily_min);
             if (run_data->clock_page == 1)
             {
-                display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE);
+                AIO_LVGL_OPERATE_LOCK(display_curve(run_data->wea.daily_max, run_data->wea.daily_min, LV_SCR_LOAD_ANIM_NONE););
             }
         };
         break;
