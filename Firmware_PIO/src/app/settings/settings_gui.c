@@ -106,12 +106,16 @@ void display_settings(const char *cur_ver, const char *new_ver, lv_scr_load_anim
 {
     lv_label_set_text(title_label, "#00ff00 HOLO\tCUBIC#");
     lv_label_set_text_fmt(cur_ver_label, "Now Version:  #ff0000 %s#", cur_ver);
-    lv_label_set_text(support_label, "7317805089");
+    lv_label_set_text(support_label, "Sina:7317805089");
     lv_label_set_text(author_label, "@NiYongsheng");
 
-    if (strcmp(cur_ver, &new_ver[1]) < 0)
+    if (new_ver == NULL)
     {
-        lv_label_set_text_fmt(new_ver_label, "Please update your cubic to #ff0000 %s#", new_ver);
+        lv_label_set_text_fmt(new_ver_label, "#ffd556 GitHub API Error!");
+    }
+    else if (strcmp(cur_ver, &new_ver[1]) < 0)
+    {
+        lv_label_set_text_fmt(new_ver_label, "Please update your cubic to #00ff00 %s#", new_ver);
         lv_obj_align(new_ver_label, LV_ALIGN_CENTER, 0, 60);
     }
     else

@@ -170,10 +170,12 @@ static void get_github_version(void)
 {
     HTTPClient http;
 
-    // Specify the URL for the GitHub API
-    String url = "https://api.github.com/repos/niyongsheng/HoloCubic/releases/latest";
+    // GitHub API
+    String api = "https://api.github.com/repos/niyongsheng/HoloCubic/releases/latest";
+    Serial.print("API = ");
+    Serial.println(api);
 
-    http.begin(url);
+    http.begin(api);
     int httpCode = http.GET();
 
     if (httpCode > 0)
@@ -186,6 +188,11 @@ static void get_github_version(void)
         String version = sk["tag_name"].as<String>();
         Serial.println(version);
         display_settings(AIO_VERSION, version.c_str(), LV_SCR_LOAD_ANIM_NONE);
+    }
+    else
+    {
+        Serial.println("Error on HTTP request");
+        display_settings(AIO_VERSION, NULL, LV_SCR_LOAD_ANIM_NONE);
     }
 
     http.end();
@@ -250,6 +257,8 @@ static int settings_exit_callback(void *param)
         free(run_data);
         run_data = NULL;
     }
+    executed = 0;
+
     return 0;
 }
 
