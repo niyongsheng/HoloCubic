@@ -13,7 +13,7 @@
 #define WEATHER_APP_NAME "Weather"
 #define WEATHER_NOW_API "https://www.yiketianqi.com/free/day?appid=%s&appsecret=%s&unescape=1&city=%s"
 #define WEATHER_NOW_API_UPDATE "https://yiketianqi.com/api?unescape=1&version=v6&appid=%s&appsecret=%s&city=%s"
-#define WEATHER_NOW_API_NEWEST "https://v1.yiketianqi.com/api?unescape=1&version=v91&appid=%s&appsecret=%s&city=%s" // USE API
+#define WEATHER_NOW_API_NEWEST "https://v1.yiketianqi.com/api?unescape=1&version=v1&appid=%s&appsecret=%s&city=%s" // USE API
 #define WEATHER_DALIY_API "https://v1.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"            // USE API
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"                                // USE API
 #define WEATHER_PAGE_SIZE 2
@@ -265,7 +265,7 @@ static void get_message(void)
             Serial.println(size);
 
             String html = http.getString();
-            Serial.println(html.substring(0, 100));
+            Serial.println(html.substring(0, 200));
             String assignedToStart = "<span class='label label-light label-badge'>";
             String assignedToEnd = "</span>";
             size_t assignedToStartPos = html.indexOf(assignedToStart);

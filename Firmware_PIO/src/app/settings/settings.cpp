@@ -3,6 +3,7 @@
 #include "settings_gui.h"
 #include "sys/app_controller.h"
 #include "common.h"
+#include "ArduinoJson.h"
 
 #define SETTINGS_APP_NAME "Settings"
 #define RECV_BUF_LEN 128
@@ -13,6 +14,7 @@ struct SettingsAppRunData
     uint16_t recv_len;
 };
 
+static int executed = 0;
 static SettingsAppRunData *run_data = NULL;
 
 int exec_order(int len, const uint8_t *data)
@@ -153,13 +155,40 @@ static int settings_init(AppController *sys)
     // 初始化运行时的参数
     settings_gui_init();
 
-    display_settings(AIO_VERSION, "v 1.0.0", LV_SCR_LOAD_ANIM_NONE);
+    // 初始化GUI
+    display_settings_init();
 
     // 初始化运行时参数
     run_data = (SettingsAppRunData *)calloc(1, sizeof(SettingsAppRunData));
     run_data->recv_buf = (uint8_t *)malloc(RECV_BUF_LEN);
     run_data->recv_len = 0;
+
     return 0;
+}
+
+static void get_github_version(void)
+{
+    HTTPClient http;
+
+    // Specify the URL for the GitHub API
+    String url = "https://api.github.com/repos/niyongsheng/HoloCubic/releases/latest";
+
+    http.begin(url);
+    int httpCode = http.GET();
+
+    if (httpCode > 0)
+    {
+        String payload = http.getString();
+        Serial.println(payload);
+        DynamicJsonDocument doc(2048);
+        deserializeJson(doc, payload);
+        JsonObject sk = doc.as<JsonObject>();
+        String version = sk["tag_name"].as<String>();
+        Serial.println(version);
+        display_settings(AIO_VERSION, version.c_str(), LV_SCR_LOAD_ANIM_NONE);
+    }
+
+    http.end();
 }
 
 static void settings_process(AppController *sys,
@@ -169,6 +198,13 @@ static void settings_process(AppController *sys,
     {
         sys->app_exit(); // 退出APP
         return;
+    }
+
+    if (!executed)
+    {
+        executed = 1;
+        // 执行一次
+        get_github_version();
     }
 
     if (Serial.available())
@@ -226,7 +262,8 @@ static void settings_message_handle(const char *from, const char *to,
     {
     case APP_MESSAGE_WIFI_CONN:
     {
-        // todo
+        // 获取版本信息
+        get_github_version();
     }
     break;
     case APP_MESSAGE_WIFI_AP:

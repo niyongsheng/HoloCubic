@@ -66,17 +66,20 @@ void display_settings_init(void)
     title_label = lv_label_create(settings_scr);
     lv_obj_add_style(title_label, &title_style, LV_STATE_DEFAULT);
     lv_obj_align(title_label, LV_ALIGN_TOP_MID, 0, 20);
-    lv_label_set_recolor(title_label, true); //先得使能文本重绘色功能
+    lv_label_set_recolor(title_label, true); // 先得使能文本重绘色功能
+    lv_label_set_text(title_label, "#00ff00 HOLO\tCUBIC#");
 
     cur_ver_label = lv_label_create(settings_scr);
     lv_obj_add_style(cur_ver_label, &label_style, LV_STATE_DEFAULT);
-    lv_label_set_recolor(cur_ver_label, true); //先得使能文本重绘色功能
+    lv_label_set_recolor(cur_ver_label, true); // 先得使能文本重绘色功能
     lv_obj_align(cur_ver_label, LV_ALIGN_BOTTOM_LEFT, 5, -130);
+    lv_label_set_text_fmt(cur_ver_label, "Now Version:  #ff0000 --.--.--#");
 
     support_label = lv_label_create(settings_scr);
     lv_obj_add_style(support_label, &label_style, LV_STATE_DEFAULT);
-    lv_label_set_recolor(support_label, true); //先得使能文本重绘色功能
+    lv_label_set_recolor(support_label, true); // 先得使能文本重绘色功能
     lv_obj_align(support_label, LV_ALIGN_BOTTOM_MID, 0, -90);
+    lv_label_set_text(support_label, "Contact Information");
 
     new_ver_label = lv_label_create(settings_scr);
     lv_obj_add_style(new_ver_label, &info_style, LV_STATE_DEFAULT);
@@ -85,36 +88,36 @@ void display_settings_init(void)
     // lvgl8之前版本，模式一旦设置 LV_LABEL_LONG_SCROLL_CIRCULAR
     // 宽度恒定等于当前文本的长度，所以下面先设置以下长度
     // lv_label_set_text(new_ver_label, "Please update your A");
-    lv_label_set_recolor(new_ver_label, true); //先得使能文本重绘色功能
+    lv_label_set_recolor(new_ver_label, true); // 先得使能文本重绘色功能
     lv_label_set_long_mode(new_ver_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_align(new_ver_label, LV_ALIGN_CENTER, 0, 60);
-    lv_label_set_text_fmt(new_ver_label, "#ff0000 Is the latest version!");
+    lv_label_set_text_fmt(new_ver_label, "#ff0000 checking version...");
 
     author_label = lv_label_create(settings_scr);
     lv_obj_add_style(author_label, &info_style, LV_STATE_DEFAULT);
     lv_obj_align(author_label, LV_ALIGN_BOTTOM_MID, 0, -10);
-    lv_label_set_recolor(author_label, true); //先得使能文本重绘色功能
+    lv_label_set_recolor(author_label, true); // 先得使能文本重绘色功能
+    lv_label_set_text(author_label, "@Author");
 
     lv_scr_load(settings_scr);
 }
 
 void display_settings(const char *cur_ver, const char *new_ver, lv_scr_load_anim_t anim_type)
 {
-    display_settings_init();
-
     lv_label_set_text(title_label, "#00ff00 HOLO\tCUBIC#");
-
     lv_label_set_text_fmt(cur_ver_label, "Now Version:  #ff0000 %s#", cur_ver);
+    lv_label_set_text(support_label, "7317805089");
+    lv_label_set_text(author_label, "@NiYongsheng");
 
-    lv_label_set_text(support_label, "QQ:583100349");
-
-    if (strcmp(cur_ver, &new_ver[2]) < 0)
+    if (strcmp(cur_ver, &new_ver[1]) < 0)
     {
         lv_label_set_text_fmt(new_ver_label, "Please update your cubic to #ff0000 %s#", new_ver);
         lv_obj_align(new_ver_label, LV_ALIGN_CENTER, 0, 60);
     }
-
-    lv_label_set_text(author_label, "@NiYongsheng");
+    else
+    {
+        lv_label_set_text_fmt(new_ver_label, "#ff0000 Is the latest version!");
+    }
 }
 
 void settings_gui_del(void)
