@@ -42,7 +42,7 @@ VScode上的`PlatformIO`插件中的ESP32-Pico平台开发。
 ## 固件写入:
 - 固件下载[工具](https://github.com/espressif/esptool/releases)
 - 最新版[固件](https://github.com/niyongsheng/HoloCubic/releases)
-- 波特率 `921600` `460800` `115200` 
+- 波特率 `921600` `460800` `115200串口监视` 
 ```shell
 // windows清空flash
 esptool.exe -p COM3 erase_flash
